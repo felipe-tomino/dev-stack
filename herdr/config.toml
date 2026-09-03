@@ -1,0 +1,23 @@
+onboarding = false
+
+[ui]
+status_indicators = "symbols"
+show_agent_labels_on_pane_borders = false
+sidebar_width = 42
+sidebar_min_width = 30
+sidebar_max_width = 52
+
+[ui.sidebar.spaces]
+row_gap = 0
+rows = [
+    [
+        "state_icon",
+        { token = "workspace", bold = true },
+        { token = "$project", fg = "#89b4fa", bold = true },
+        { token = "$summary", dim = true },
+    ],
+    [{ token = "branch", dim = true }, "git_status"],
+]
+
+[worktrees]
+directory = "~/.herdr/worktrees"

@@ -1,0 +1,21 @@
+# Machine-only state
+local/
+.env
+.env.*
+!.env.example
+.dev.vars
+.DS_Store
+*.log
+*.backup-*
+*.db
+*.sqlite
+*.sqlite3
+*.pem
+*.key
+credentials.json
+.ocx/
+.wrangler/
+
+# Dependencies and package-manager caches
+node_modules/
+.bun/

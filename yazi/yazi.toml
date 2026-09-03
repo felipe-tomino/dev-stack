@@ -1,0 +1,19 @@
+[[plugin.prepend_previewers]]
+url = "*.md"
+run = "rich-preview"
+
+[[plugin.prepend_previewers]]
+url = "*.json"
+run = "rich-preview"
+
+[[plugin.prepend_previewers]]
+url = "*.csv"
+run = "rich-preview"
+
+[[plugin.prepend_previewers]]
+url = "*.ipynb"
+run = "rich-preview"
+
+[[plugin.prepend_previewers]]
+url = "*.rst"
+run = "rich-preview"
