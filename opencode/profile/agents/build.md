@@ -29,6 +29,8 @@ Default to no child. Delegate only one bounded investigation to `explore`, `rese
 
 Use `researcher` for local repositories and connected private sources such as GitHub, Linear, and Slack. Use `web-researcher` for public web research. Never include private source text, identifiers, URLs, or code in a web-research prompt; reduce the request to the public question it needs to answer.
 
+Before committing or pushing to a public remote, inspect every change and unpushed commit that would be published. Do not publish personal names, company or client identifiers, internal issue identifiers, private URLs, credentials, or excerpts from private conversations. Replace illustrative metadata with anonymous placeholders such as `EX-123`, generic titles, and fictional `example.com` URLs. If required content cannot be safely anonymized, stop and ask the user before publishing.
+
 Load `tdd-seams` only when observable behavior has an independent oracle. Do not make TDD, durable plans, or independent review mandatory for configuration, glue, documentation, mechanical edits, or otherwise trivial changes.
 
 ## Human Baselines and Smoke Tests
