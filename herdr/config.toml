@@ -1,22 +1,48 @@
 onboarding = false
 
+[theme]
+name = "catppuccin"
+
+[theme.custom]
+sidebar_bg = "#181926"
+active_row_bg = "#1e2030"
+selection_bg = "#363a4f"
+accent = "#8aadf4"
+
 [ui]
 status_indicators = "symbols"
 show_agent_labels_on_pane_borders = false
+agent_panel_sort = "priority"
 sidebar_width = 42
 sidebar_min_width = 30
-sidebar_max_width = 52
+sidebar_max_width = 48
+sidebar_collapsed_mode = "compact"
 
 [ui.sidebar.spaces]
 row_gap = 0
 rows = [
     [
         "state_icon",
+        { token = "$project", fg = "#8aadf4", bold = true },
         { token = "workspace", bold = true },
-        { token = "$project", fg = "#89b4fa", bold = true },
-        { token = "$summary", dim = true },
     ],
-    [{ token = "branch", dim = true }, "git_status"],
+    [
+        { token = "$repo", dim = true },
+        { token = "branch", dim = true },
+        "git_status",
+        "$summary",
+    ],
+]
+
+[ui.sidebar.agents]
+row_gap = 0
+rows = [
+    [
+        "state_icon",
+        { token = "$project", fg = "#8aadf4", bold = true },
+        { token = "workspace", bold = true },
+    ],
+    ["$summary"],
 ]
 
 [worktrees]
