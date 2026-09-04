@@ -12,7 +12,7 @@ accent = "#8aadf4"
 [ui]
 status_indicators = "symbols"
 show_agent_labels_on_pane_borders = false
-agent_panel_sort = "priority"
+agent_panel_sort = "spaces"
 sidebar_width = 42
 sidebar_min_width = 30
 sidebar_max_width = 48
