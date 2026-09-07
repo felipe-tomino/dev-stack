@@ -27,7 +27,8 @@ Install Ghostty, Herdr, Hunk, Atuin, OpenCode, OCX, and optionally Yazi through 
 Bootstrap a profile and compose the upstream components it references:
 
 ```bash
-ocx profile add ws --source kdco/workspace --global
+ocx profile add ws --global
+ocx registry add https://registry.kdco.dev --name kdco --profile ws
 ocx add --profile ws kdco/philosophy kdco/code-review kdco/notify
 ```
 
@@ -35,6 +36,12 @@ Then copy the authored snapshot into the profile:
 
 ```bash
 cp -R opencode/profile/. "$HOME/.config/opencode/profiles/ws/"
+```
+
+To use this profile by default in new shells, add this to the shell configuration:
+
+```bash
+export OCX_PROFILE=ws
 ```
 
 The snapshot intentionally omits model names. Agents inherit the model configured by OpenCode or the active provider.
@@ -61,7 +68,10 @@ atuin/config.toml  -> ~/.config/atuin/config.toml
 yazi/*.toml        -> ~/.config/yazi/
 ```
 
-After copying the Yazi files, run `ya pkg install` to restore the selected plugins.
+After copying the Yazi files, run `ya pkg install` to restore the selected packages. The
+`rich-preview-md` previewer is a machine-local fork and must also be available at
+`~/.config/yazi/plugins/rich-preview-md.yazi/`; its implementation and Python environment are
+not included in this repository.
 
 ## OpenCode workflow
 
