@@ -6,9 +6,6 @@
 	"renameWindow": true,
 	"exclude": [
 		"**/CLAUDE.md",
-		"**/CONTEXT.md",
-		"**/.opencode/**",
-		"**/opencode.jsonc",
-		"**/opencode.json"
+		"**/CONTEXT.md"
 	]
 }

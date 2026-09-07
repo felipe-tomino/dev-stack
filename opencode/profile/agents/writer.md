@@ -15,25 +15,27 @@ permission:
   "slack-read_*": allow
   bash:
     "*": deny
-    "gh gist list*": ask
-    "gh gist view*": ask
-    "gh issue list*": ask
-    "gh issue status*": ask
-    "gh issue view*": ask
-    "gh pr checks*": ask
-    "gh pr diff*": ask
-    "gh pr list*": ask
-    "gh pr status*": ask
-    "gh pr view*": ask
-    "gh release list*": ask
-    "gh release view*": ask
-    "gh repo list*": ask
-    "gh repo view*": ask
-    "gh run list*": ask
-    "gh run view*": ask
-    "gh search *": ask
-    "gh workflow list*": ask
-    "gh workflow view*": ask
+    "gh gist list*": allow
+    "gh gist view*": allow
+    "gh issue list*": allow
+    "gh issue status*": allow
+    "gh issue view*": allow
+    "gh pr checks*": allow
+    "gh pr diff*": allow
+    "gh pr list*": allow
+    "gh pr status*": allow
+    "gh pr view*": allow
+    "gh release list*": allow
+    "gh release view*": allow
+    "gh repo list*": allow
+    "gh repo view*": allow
+    "gh run list*": allow
+    "gh run view*": allow
+    "gh search *": allow
+    "gh workflow list*": allow
+    "gh workflow view*": allow
+    "gh *>*": deny
+    "gh *<*": deny
   task: deny
   skill:
     "*": deny

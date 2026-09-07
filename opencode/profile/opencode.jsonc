@@ -20,11 +20,7 @@
 		"context7_*": "deny",
 		"exa_*": "deny",
 		"gh_grep_*": "deny",
-		"webfetch": "deny",
-		"external_directory": {
-			"~/repos/**": "allow",
-			"~/.herdr/worktrees/**": "allow"
-		}
+		"webfetch": "deny"
 	},
 	"mcp": {
 		"context7": {

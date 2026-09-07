@@ -15,24 +15,41 @@ permission:
   "slack-read_*": allow
   bash:
     "*": deny
-    "git diff *": ask
-    "git log *": ask
-    "git show *": ask
-    "git blame *": ask
+    "git diff *": deny
+    "git log *": deny
+    "git show *": deny
+    "git blame *": allow
     "git status --short --branch": allow
-    "git diff": allow
-    "git diff --cached": allow
-    "git log --oneline -10": allow
-    "git show --stat --oneline HEAD": allow
+    "git diff --no-ext-diff --no-textconv": allow
+    "git diff --no-ext-diff --no-textconv *": allow
+    "git log --no-ext-diff --no-textconv": allow
+    "git log --no-ext-diff --no-textconv *": allow
+    "git show --no-ext-diff --no-textconv": allow
+    "git show --no-ext-diff --no-textconv *": allow
     "git branch --show-current": allow
     "git branch --list": allow
     "git remote -v": allow
-    "gh issue view*": ask
-    "gh pr checks*": ask
-    "gh pr diff*": ask
-    "gh pr view*": ask
-    "gh repo view*": ask
-    "gh run view*": ask
+    "gh issue view*": allow
+    "gh pr checks*": allow
+    "gh pr diff*": allow
+    "gh pr view*": allow
+    "gh repo view*": allow
+    "gh run view*": allow
+    "git diff *--no-ind*": deny
+    "git diff *--out*": deny
+    "git diff *--ext*": deny
+    "git diff *--text*": deny
+    "git log *--out*": deny
+    "git log *--ext*": deny
+    "git log *--text*": deny
+    "git show *--out*": deny
+    "git show *--ext*": deny
+    "git show *--text*": deny
+    "git blame *--cont*": deny
+    "git *>*": deny
+    "git *<*": deny
+    "gh *>*": deny
+    "gh *<*": deny
   task:
     "*": deny
     explore: allow
@@ -52,3 +69,5 @@ Review a stable baseline and diff, plan, or specification without editing. Load 
 Inspect directly by default. Use at most one bounded `explore` investigation and one `reviewer` pass only when breadth or risk justifies them. Require evidence, confidence, one objective, a concrete deliverable, and a stopping condition. Never delegate edits.
 
 Local repositories, authenticated GitHub, Linear, and Slack are permitted read-only evidence sources. Retrieve only context tied to the review target. Freeze the local commit or diff, the remote pull request head SHA, and the identifiers and timestamps of any Linear or Slack acceptance evidence before analysis. Never use open web research or write-capable service operations during review.
+
+For Git diffs, logs, and shows, always pass `--no-ext-diff --no-textconv` immediately after the subcommand. These flags keep repository-configured helper processes outside the read-only permission surface.

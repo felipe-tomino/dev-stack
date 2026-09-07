@@ -91,7 +91,9 @@ Local repositories, authenticated GitHub data, Linear, and Slack form the privat
 
 Connected data is sent to the configured model provider when an agent reads it. The `linear-read_*` and `slack-read_*` permission patterns assume those namespaces contain read-only tools; review the effective tool list whenever integrations change.
 
-The profile allows external access to `~/repos/**` and `~/.herdr/worktrees/**`. Build also has unrestricted edit and shell permissions. These are personal trust choices, not recommended defaults for an unfamiliar environment.
+External local paths require permission by default, so one project does not receive access to sibling repositories or parent directories. A project can declare narrow exceptions in its own `.opencode/opencode.jsonc`; this repository allows its owned Herdr configuration, installed `ws` profile, TUI configuration, and TUI plugins. Read-only agents cannot edit files or run unrestricted shell commands. Build may edit the current project and project-specific external roots, but its unrestricted shell is a trusted capability rather than an OS-level filesystem sandbox. Workspace Manager may run only the allowlisted Herdr and Git setup commands. These are personal trust choices, not recommended defaults for an unfamiliar environment.
+
+Run `node --test opencode/profile/permissions.test.mjs` after changing profile or project permissions. The regression test checks global and project external roots, read-only Git restrictions, Build's trust boundary, Workspace Manager's mutation surface, and Web Researcher's local-data isolation.
 
 ## Local customization
 

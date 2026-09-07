@@ -1,0 +1,83 @@
+{
+	"$schema": "https://opencode.ai/config.json",
+	"permission": {
+		"external_directory": {
+			"~/.config/herdr/config.toml": "allow",
+			"~/.config/opencode/profiles/ws/**": "allow",
+			"~/.config/opencode/tui-plugins/**": "allow",
+			"~/.config/opencode/tui.jsonc": "allow"
+		}
+	},
+	"agent": {
+		"plan": {
+			"permission": {
+				"external_directory": {
+					"~/.config/herdr/config.toml": "allow",
+					"~/.config/opencode/profiles/ws/**": "allow",
+					"~/.config/opencode/tui-plugins/**": "allow",
+					"~/.config/opencode/tui.jsonc": "allow"
+				}
+			}
+		},
+		"research": {
+			"permission": {
+				"external_directory": {
+					"~/.config/herdr/config.toml": "allow",
+					"~/.config/opencode/profiles/ws/**": "allow",
+					"~/.config/opencode/tui-plugins/**": "allow",
+					"~/.config/opencode/tui.jsonc": "allow"
+				}
+			}
+		},
+		"researcher": {
+			"permission": {
+				"external_directory": {
+					"~/.config/herdr/config.toml": "allow",
+					"~/.config/opencode/profiles/ws/**": "allow",
+					"~/.config/opencode/tui-plugins/**": "allow",
+					"~/.config/opencode/tui.jsonc": "allow"
+				}
+			}
+		},
+		"review": {
+			"permission": {
+				"external_directory": {
+					"~/.config/herdr/config.toml": "allow",
+					"~/.config/opencode/profiles/ws/**": "allow",
+					"~/.config/opencode/tui-plugins/**": "allow",
+					"~/.config/opencode/tui.jsonc": "allow"
+				}
+			}
+		},
+		"reviewer": {
+			"permission": {
+				"external_directory": {
+					"~/.config/herdr/config.toml": "allow",
+					"~/.config/opencode/profiles/ws/**": "allow",
+					"~/.config/opencode/tui-plugins/**": "allow",
+					"~/.config/opencode/tui.jsonc": "allow"
+				}
+			}
+		},
+		"workspace-manager": {
+			"permission": {
+				"external_directory": {
+					"~/.config/herdr/config.toml": "allow",
+					"~/.config/opencode/profiles/ws/**": "allow",
+					"~/.config/opencode/tui-plugins/**": "allow",
+					"~/.config/opencode/tui.jsonc": "allow"
+				}
+			}
+		},
+		"writer": {
+			"permission": {
+				"external_directory": {
+					"~/.config/herdr/config.toml": "allow",
+					"~/.config/opencode/profiles/ws/**": "allow",
+					"~/.config/opencode/tui-plugins/**": "allow",
+					"~/.config/opencode/tui.jsonc": "allow"
+				}
+			}
+		}
+	}
+}

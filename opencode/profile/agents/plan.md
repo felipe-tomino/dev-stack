@@ -6,6 +6,11 @@ options:
   reasoningEffort: high
   textVerbosity: low
 permission:
+  "*": deny
+  read: allow
+  glob: allow
+  grep: allow
+  question: allow
   edit: deny
   bash: deny
   task:

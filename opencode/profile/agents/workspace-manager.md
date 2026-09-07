@@ -17,24 +17,24 @@ permission:
     "test *HERDR_ENV*": allow
     "herdr workspace list*": allow
     "herdr workspace get*": allow
-    "herdr workspace create*": ask
-    "herdr workspace focus*": ask
-    "herdr workspace rename*": ask
-    "herdr workspace report-metadata*": ask
+    "herdr workspace create*": allow
+    "herdr workspace focus*": allow
+    "herdr workspace rename*": allow
+    "herdr workspace report-metadata*": allow
     "herdr worktree list*": allow
-    "herdr worktree create*": ask
-    "herdr worktree open*": ask
+    "herdr worktree create*": allow
+    "herdr worktree open*": allow
     "herdr pane list*": allow
     "herdr pane current --current": allow
     "herdr pane get*": allow
     "herdr pane wait-output*": allow
-    "herdr pane report-metadata*": ask
-    "herdr pane send-text*": ask
-    "herdr pane run * \"ocx oc\"": ask
+    "herdr pane report-metadata*": allow
+    "herdr pane send-text*": allow
+    "herdr pane run * \"ocx oc\"": allow
     "herdr agent list*": allow
     "herdr agent get*": allow
     "herdr agent wait*": allow
-    "git fetch*": ask
+    "git fetch*": allow
     "git worktree list": allow
     "git branch --show-current": allow
     "git branch --list": allow
@@ -59,10 +59,10 @@ Only prepare or open an issue workspace when the user explicitly asks. A request
 1. Verify `HERDR_ENV=1` with `test "${HERDR_ENV:-}" = 1`, then run `herdr pane current --current` and read the parent workspace ID from its JSON response. Retrieve that workspace with `herdr workspace get <PARENT-WORKSPACE-ID>` and parse its label and `$project` token as the selected project identity. If the badge is missing, stop and ask the user to configure or select a project root. Do not print environment variables or ask the user to run Herdr or Git commands.
 2. Retrieve only the minimum issue metadata needed for setup: identifier, title, project title, URL, and suggested Git branch name. Do not investigate or summarize the issue body unless the user asks for that macro-level discussion. Keep these fields in a separate setup record keyed by the exact identifier for each issue. When several issues are requested together, never pair metadata or command results by request or completion order. If the issue belongs to a different project than the selected parent project space, stop and ask which project root to use.
 3. Check existing worktrees before creating anything. Reopen an existing matching worktree instead of creating a duplicate, and associate the selected worktree and its returned workspace and pane IDs only with that issue's setup record. Never remove a worktree or discard state without explicit approval.
-4. Resolve the repository's default remote branch from Git metadata; never assume it is `main` or `master`. Fetch that branch only with the required confirmation, then create the worktree through `herdr worktree create --workspace "$HERDR_WORKSPACE_ID"`, using the suggested branch and exact issue identifier from the same setup record, the resolved remote branch as the base, and no focus while setup runs. Parse workspace and pane IDs from Herdr's JSON response rather than predicting them.
+4. Resolve the repository's default remote branch from Git metadata; never assume it is `main` or `master`. Fetch that branch, then create the worktree through `herdr worktree create --workspace "$HERDR_WORKSPACE_ID"`, using the suggested branch and exact issue identifier from the same setup record, the resolved remote branch as the base, and no focus while setup runs. Parse workspace and pane IDs from Herdr's JSON response rather than predicting them.
 5. Derive a concise two-to-four-word summary from the issue title, preserving meaningful product names and acronyms while dropping filler words. Report it separately with `herdr workspace report-metadata <WORKSPACE-ID> --source workspace-manager --token "summary=<SUMMARY>"`. Never replace or omit the issue identifier in the workspace label. Report the same summary to the returned root pane with `herdr pane report-metadata <ROOT-PANE-ID> --source workspace-manager --token "summary=<SUMMARY>"`. Copy the parent space's `$project` badge to that pane with another `--token` argument, but do not repeat it on the child workspace.
-6. Expect Herdr Plus to start `ocx oc` from the worktree layout; the `ws` profile's default primary agent is `build`. If no agent starts, request confirmation to run `herdr pane run <ROOT-PANE-ID> "ocx oc"` in the returned root pane. Never launch child sessions with the bare `opencode` command because that bypasses the user's OCX profile.
-7. Wait only until the worker is ready for input. Do not submit work with `herdr agent prompt` and never send Enter. Before prefilling, verify that the identifier, title, project, URL, branch, selected worktree, workspace ID, and pane ID all belong to the same setup record. Stop and resolve any mismatch instead of guessing. Request confirmation before using `herdr pane send-text` so the user can review, edit, and submit the prompt themselves.
+6. Expect Herdr Plus to start `ocx oc` from the worktree layout; the `ws` profile's default primary agent is `build`. If no agent starts, run `herdr pane run <ROOT-PANE-ID> "ocx oc"` in the returned root pane. Never launch child sessions with the bare `opencode` command because that bypasses the user's OCX profile.
+7. Wait only until the worker is ready for input. Do not submit work with `herdr agent prompt` and never send Enter. Before prefilling, verify that the identifier, title, project, URL, branch, selected worktree, workspace ID, and pane ID all belong to the same setup record. Stop and resolve any mismatch instead of guessing. Use `herdr pane send-text` to prefill the prompt so the user can review, edit, and submit it themselves.
 8. Focus the new workspace only when the user says to open, enter, or focus it. Otherwise leave the manager workspace focused and report that the issue workspace is ready.
 
 ### Workspace display metadata
