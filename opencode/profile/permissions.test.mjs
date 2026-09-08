@@ -33,6 +33,15 @@ const externalReaders = [
 ];
 
 const gitReaders = ["research", "researcher", "review", "reviewer"];
+const safeGitMetadataPatterns = [
+	"git merge-base *",
+	"git rev-parse HEAD",
+	"git rev-parse --verify HEAD",
+	"git rev-parse --show-toplevel",
+	"git status --short",
+	"git branch --list *",
+	"git remote get-url origin",
+];
 const readOnlyAgents = [
 	"explore",
 	"plan",
@@ -71,9 +80,12 @@ function parseAgentPermissions(agent) {
 		if (!inPermissions) continue;
 		if (/^[^ ]/.test(line)) break;
 
-		const nestedMatch = line.match(/^    "([^"]+)": (allow|ask|deny)$/);
+		const nestedMatch = line.match(/^    "((?:\\.|[^"])*)": (allow|ask|deny)$/);
 		if (section && nestedMatch) {
-			nested.get(section).push({ pattern: nestedMatch[1], action: nestedMatch[2] });
+			nested.get(section).push({
+				pattern: nestedMatch[1].replaceAll('\\"', '"'),
+				action: nestedMatch[2],
+			});
 			continue;
 		}
 
@@ -172,6 +184,19 @@ test("read-only Git permissions reject escape and write-capable options", async 
 			broadDenyIndex < safeAllowIndex && safeAllowIndex < outputDenyIndex,
 			`${agentName} must deny broad Git, allow the safe prefix, then deny output options`,
 		);
+	}
+});
+
+test("Git evidence agents can inspect common repository metadata", async () => {
+	for (const agentName of gitReaders) {
+		const { nested } = parseAgentPermissions(await readAgent(agentName));
+		const bashRules = nested.get("bash");
+		for (const safePattern of safeGitMetadataPatterns) {
+			assert.ok(
+				bashRules.some((rule) => rule.pattern === safePattern && rule.action === "allow"),
+				`${agentName} cannot run ${safePattern}`,
+			);
+		}
 	}
 });
 
@@ -281,6 +306,18 @@ test("Workspace Manager cannot remove worktrees or submit worker prompts", async
 	const manager = await readAgent("workspace-manager");
 	const { nested } = parseAgentPermissions(manager);
 	const bashRules = nested.get("bash");
+	for (const safePattern of [
+		"git branch --list *",
+		"git rev-parse --show-toplevel",
+		"git symbolic-ref refs/remotes/origin/HEAD",
+		"git symbolic-ref --short refs/remotes/origin/HEAD",
+		"git status --short",
+	]) {
+		assert.ok(
+			bashRules.some((rule) => rule.pattern === safePattern && rule.action === "allow"),
+			`Workspace Manager cannot run ${safePattern}`,
+		);
+	}
 	assert.ok(!bashRules.some((rule) => rule.pattern.startsWith("herdr worktree remove") && rule.action === "allow"));
 	assert.ok(!bashRules.some((rule) => rule.pattern.startsWith("herdr agent prompt") && rule.action === "allow"));
 	assert.match(manager, /Never remove a worktree or discard state without explicit approval/);

@@ -38,9 +38,14 @@ permission:
     "git worktree list": allow
     "git branch --show-current": allow
     "git branch --list": allow
+    "git branch --list *": allow
+    "git rev-parse --show-toplevel": allow
+    "git symbolic-ref refs/remotes/origin/HEAD": allow
+    "git symbolic-ref --short refs/remotes/origin/HEAD": allow
     "git remote -v": allow
     "git remote get-url origin": allow
     "git remote show origin": allow
+    "git status --short": allow
     "git status --short --branch": allow
   task: deny
   skill: deny

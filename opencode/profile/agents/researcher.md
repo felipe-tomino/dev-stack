@@ -18,6 +18,11 @@ permission:
     "git log *": deny
     "git show *": deny
     "git blame *": allow
+    "git merge-base *": allow
+    "git rev-parse HEAD": allow
+    "git rev-parse --verify HEAD": allow
+    "git rev-parse --show-toplevel": allow
+    "git status --short": allow
     "git status --short --branch": allow
     "git diff --no-ext-diff --no-textconv": allow
     "git diff --no-ext-diff --no-textconv *": allow
@@ -27,7 +32,9 @@ permission:
     "git show --no-ext-diff --no-textconv *": allow
     "git branch --show-current": allow
     "git branch --list": allow
+    "git branch --list *": allow
     "git remote -v": allow
+    "git remote get-url origin": allow
     "gh issue list*": allow
     "gh issue view*": allow
     "gh pr checks*": allow
