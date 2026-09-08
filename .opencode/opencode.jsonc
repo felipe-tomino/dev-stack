@@ -2,9 +2,14 @@
 	"$schema": "https://opencode.ai/config.json",
 	"permission": {
 		"external_directory": {
+			"~/.config/ghostty/config": "allow",
 			"~/.config/herdr/config.toml": "allow",
+			"~/.config/atuin/config.toml": "allow",
+			"~/.config/yazi/keymap.toml": "allow",
+			"~/.config/yazi/package.toml": "allow",
+			"~/.config/yazi/yazi.toml": "allow",
 			"~/.config/opencode/profiles/ws/**": "allow",
-			"~/.config/opencode/tui-plugins/**": "allow",
+			"~/.config/opencode/tui-plugins/session-forks.js": "allow",
 			"~/.config/opencode/tui.jsonc": "allow"
 		}
 	},
@@ -12,9 +17,14 @@
 		"plan": {
 			"permission": {
 				"external_directory": {
+					"~/.config/ghostty/config": "allow",
 					"~/.config/herdr/config.toml": "allow",
+					"~/.config/atuin/config.toml": "allow",
+					"~/.config/yazi/keymap.toml": "allow",
+					"~/.config/yazi/package.toml": "allow",
+					"~/.config/yazi/yazi.toml": "allow",
 					"~/.config/opencode/profiles/ws/**": "allow",
-					"~/.config/opencode/tui-plugins/**": "allow",
+					"~/.config/opencode/tui-plugins/session-forks.js": "allow",
 					"~/.config/opencode/tui.jsonc": "allow"
 				}
 			}
@@ -22,9 +32,14 @@
 		"research": {
 			"permission": {
 				"external_directory": {
+					"~/.config/ghostty/config": "allow",
 					"~/.config/herdr/config.toml": "allow",
+					"~/.config/atuin/config.toml": "allow",
+					"~/.config/yazi/keymap.toml": "allow",
+					"~/.config/yazi/package.toml": "allow",
+					"~/.config/yazi/yazi.toml": "allow",
 					"~/.config/opencode/profiles/ws/**": "allow",
-					"~/.config/opencode/tui-plugins/**": "allow",
+					"~/.config/opencode/tui-plugins/session-forks.js": "allow",
 					"~/.config/opencode/tui.jsonc": "allow"
 				}
 			}
@@ -32,9 +47,14 @@
 		"researcher": {
 			"permission": {
 				"external_directory": {
+					"~/.config/ghostty/config": "allow",
 					"~/.config/herdr/config.toml": "allow",
+					"~/.config/atuin/config.toml": "allow",
+					"~/.config/yazi/keymap.toml": "allow",
+					"~/.config/yazi/package.toml": "allow",
+					"~/.config/yazi/yazi.toml": "allow",
 					"~/.config/opencode/profiles/ws/**": "allow",
-					"~/.config/opencode/tui-plugins/**": "allow",
+					"~/.config/opencode/tui-plugins/session-forks.js": "allow",
 					"~/.config/opencode/tui.jsonc": "allow"
 				}
 			}
@@ -42,9 +62,14 @@
 		"review": {
 			"permission": {
 				"external_directory": {
+					"~/.config/ghostty/config": "allow",
 					"~/.config/herdr/config.toml": "allow",
+					"~/.config/atuin/config.toml": "allow",
+					"~/.config/yazi/keymap.toml": "allow",
+					"~/.config/yazi/package.toml": "allow",
+					"~/.config/yazi/yazi.toml": "allow",
 					"~/.config/opencode/profiles/ws/**": "allow",
-					"~/.config/opencode/tui-plugins/**": "allow",
+					"~/.config/opencode/tui-plugins/session-forks.js": "allow",
 					"~/.config/opencode/tui.jsonc": "allow"
 				}
 			}
@@ -52,9 +77,14 @@
 		"reviewer": {
 			"permission": {
 				"external_directory": {
+					"~/.config/ghostty/config": "allow",
 					"~/.config/herdr/config.toml": "allow",
+					"~/.config/atuin/config.toml": "allow",
+					"~/.config/yazi/keymap.toml": "allow",
+					"~/.config/yazi/package.toml": "allow",
+					"~/.config/yazi/yazi.toml": "allow",
 					"~/.config/opencode/profiles/ws/**": "allow",
-					"~/.config/opencode/tui-plugins/**": "allow",
+					"~/.config/opencode/tui-plugins/session-forks.js": "allow",
 					"~/.config/opencode/tui.jsonc": "allow"
 				}
 			}
@@ -62,9 +92,14 @@
 		"workspace-manager": {
 			"permission": {
 				"external_directory": {
+					"~/.config/ghostty/config": "allow",
 					"~/.config/herdr/config.toml": "allow",
+					"~/.config/atuin/config.toml": "allow",
+					"~/.config/yazi/keymap.toml": "allow",
+					"~/.config/yazi/package.toml": "allow",
+					"~/.config/yazi/yazi.toml": "allow",
 					"~/.config/opencode/profiles/ws/**": "allow",
-					"~/.config/opencode/tui-plugins/**": "allow",
+					"~/.config/opencode/tui-plugins/session-forks.js": "allow",
 					"~/.config/opencode/tui.jsonc": "allow"
 				}
 			}
@@ -72,9 +107,14 @@
 		"writer": {
 			"permission": {
 				"external_directory": {
+					"~/.config/ghostty/config": "allow",
 					"~/.config/herdr/config.toml": "allow",
+					"~/.config/atuin/config.toml": "allow",
+					"~/.config/yazi/keymap.toml": "allow",
+					"~/.config/yazi/package.toml": "allow",
+					"~/.config/yazi/yazi.toml": "allow",
 					"~/.config/opencode/profiles/ws/**": "allow",
-					"~/.config/opencode/tui-plugins/**": "allow",
+					"~/.config/opencode/tui-plugins/session-forks.js": "allow",
 					"~/.config/opencode/tui.jsonc": "allow"
 				}
 			}

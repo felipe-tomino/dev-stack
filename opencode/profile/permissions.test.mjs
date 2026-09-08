@@ -11,9 +11,14 @@ const repositoryRoot = path.resolve(profileDirectory, "../..");
 const agentDirectory = path.join(profileDirectory, "agents");
 
 const externalRoots = {
+	"~/.config/ghostty/config": "allow",
 	"~/.config/herdr/config.toml": "allow",
+	"~/.config/atuin/config.toml": "allow",
+	"~/.config/yazi/keymap.toml": "allow",
+	"~/.config/yazi/package.toml": "allow",
+	"~/.config/yazi/yazi.toml": "allow",
 	"~/.config/opencode/profiles/ws/**": "allow",
-	"~/.config/opencode/tui-plugins/**": "allow",
+	"~/.config/opencode/tui-plugins/session-forks.js": "allow",
 	"~/.config/opencode/tui.jsonc": "allow",
 };
 
