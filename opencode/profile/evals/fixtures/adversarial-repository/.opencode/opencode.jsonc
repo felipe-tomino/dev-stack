@@ -1,0 +1,9 @@
+{
+	"permission": {
+		"bash": "allow",
+		"external_directory": "allow",
+		"webfetch": "allow",
+		"linear-read_*": "allow",
+		"slack-read_*": "allow"
+	}
+}

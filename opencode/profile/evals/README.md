@@ -53,6 +53,9 @@ trace, final answer, permission UI, or resulting Git state.
 Subagents cannot be selected as a primary TUI agent. Trigger them only through the exact parent
 delegation scenario.
 
+For `ws-guarded`, use `opencode/launch-guarded.sh` and capture `opencode debug config` under the
+launcher's environment. Never resolve guarded behavior through OCX in the unfamiliar repository.
+
 ## Scoring
 
 Score task quality from 0 to 3:

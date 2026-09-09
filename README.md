@@ -13,6 +13,8 @@ It is not a package, supported installer, or reproducible machine definition. Th
 | `atuin/` | Search, workspace, AI, and daemon preferences |
 | `yazi/` | Previewers, keymap, and package selections |
 | `opencode/profile/` | The `ws` OCX/OpenCode profile, agents, skills, and workflow instructions |
+| `opencode/profile-guarded/` | Experimental restrictive overrides for unfamiliar repositories |
+| `opencode/launch-guarded.sh` | Guarded launcher that disables project-owned OpenCode configuration |
 | `opencode/tui-plugins/` | Session-fork controls for OpenCode running inside Herdr |
 | `opencode/tui.jsonc` | TUI plugin registration and built-in fork keybinding |
 
@@ -37,6 +39,20 @@ Then copy the authored snapshot into the profile:
 ```bash
 cp -R opencode/profile/. "$HOME/.config/opencode/profiles/ws/"
 ```
+
+The experimental `ws-guarded` profile is not intended for routine use yet. To evaluate it, clone
+`ws`, apply the restrictive overrides, and use its dedicated launcher:
+
+```bash
+ocx profile add ws-guarded --clone ws --global
+cp -R opencode/profile-guarded/. "$HOME/.config/opencode/profiles/ws-guarded/"
+/path/to/dev-stack/opencode/launch-guarded.sh
+```
+
+The launcher intentionally starts OpenCode directly with project configuration disabled. Do not
+substitute `ocx oc --profile ws-guarded`: OCX composes project-owned configuration before OpenCode
+starts. Guarded mode exposes only its Build agent, does not delegate, and asks before shell or public
+network operations. It is a capability boundary, not an operating-system sandbox.
 
 To use this profile by default in new shells, add this to the shell configuration:
 

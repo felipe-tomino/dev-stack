@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 const profileDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(profileDirectory, "../..");
 const agentDirectory = path.join(profileDirectory, "agents");
+const guardedProfileDirectory = path.join(repositoryRoot, "opencode/profile-guarded");
 const requireRuntime = process.env.REQUIRE_OCX_RUNTIME === "1";
 
 const externalRoots = {
@@ -127,6 +128,12 @@ function requireRuntimeCommand(t, command) {
 	}
 	t.skip(`${command} is not installed`);
 	return false;
+}
+
+function findLastPermission(agent, permission, pattern = "*") {
+	return agent.permission.findLast(
+		(rule) => rule.permission === permission && rule.pattern === pattern,
+	);
 }
 
 test("the profile has no global external filesystem roots", async () => {
@@ -401,6 +408,95 @@ test("OpenCode resolves Explore's pilot step ceiling", (t) => {
 	delete environment.OCX_CONTEXT;
 	const explore = runJson("opencode", ["debug", "agent", "explore"], { env: environment });
 	assert.equal(explore.steps, 8);
+});
+
+test("the guarded profile declares a closed project and private-data boundary", async () => {
+	const ocx = await readJson("opencode/profile-guarded/ocx.jsonc");
+	for (const excludedPath of [
+		"**/.opencode/**",
+		"**/opencode.json",
+		"**/opencode.jsonc",
+		"**/AGENTS.md",
+		"**/CLAUDE.md",
+		"**/CONTEXT.md",
+	]) {
+		assert.ok(ocx.exclude.includes(excludedPath));
+	}
+
+	const config = await readJson("opencode/profile-guarded/opencode.jsonc");
+	assert.equal(config.permission.external_directory, "deny");
+	assert.equal(config.agent.build.permission.bash, "ask");
+	for (const integration of ["context7", "exa", "gh_grep"]) {
+		assert.equal(config.mcp[integration].enabled, false);
+	}
+	for (const agentName of readOnlyAgents) {
+		assert.equal(config.agent[agentName].disable, true);
+	}
+});
+
+test("the guarded launcher bypasses project configuration composition", async () => {
+	const launcher = await readFile(path.join(repositoryRoot, "opencode/launch-guarded.sh"), "utf8");
+	assert.match(launcher, /OPENCODE_DISABLE_PROJECT_CONFIG=true/);
+	assert.match(launcher, /OPENCODE_CONFIG_DIR=/);
+	assert.match(launcher, /unset OCX_CONTEXT/);
+	assert.match(launcher, /unset OPENCODE_CONFIG_CONTENT/);
+	assert.match(launcher, /exec opencode/);
+	assert.match(launcher, /Guarded profile not found/);
+	assert.ok(!launcher.includes("ocx oc"));
+});
+
+test("the guarded profile resists project permission escalation", async (t) => {
+	if (!requireRuntimeCommand(t, "opencode")) return;
+
+	const temporaryHome = await mkdtemp(path.join(os.tmpdir(), "ocx-guarded-home-"));
+	const temporaryProject = await mkdtemp(path.join(os.tmpdir(), "ocx-guarded-project-"));
+	const profilesDirectory = path.join(temporaryHome, ".config/opencode/profiles");
+	const guardedInstall = path.join(profilesDirectory, "ws-guarded");
+	try {
+		await mkdir(guardedInstall, { recursive: true });
+		for (const profileEntry of ["agents", "skills", "tools", "ocx.jsonc", "opencode.jsonc"]) {
+			await cp(path.join(profileDirectory, profileEntry), path.join(guardedInstall, profileEntry), {
+				recursive: true,
+			});
+		}
+		await cp(guardedProfileDirectory, guardedInstall, { recursive: true, force: true });
+		await cp(
+			path.join(profileDirectory, "evals/fixtures/adversarial-repository"),
+			temporaryProject,
+			{ recursive: true, force: true },
+		);
+
+		const environment = {
+			...process.env,
+			HOME: temporaryHome,
+			XDG_CONFIG_HOME: path.join(temporaryHome, ".config"),
+		};
+		delete environment.OCX_CONTEXT;
+		delete environment.OPENCODE_CONFIG_CONTENT;
+		environment.OPENCODE_CONFIG_DIR = guardedInstall;
+		environment.OPENCODE_DISABLE_PROJECT_CONFIG = "true";
+		const debugConfig = runJson("opencode", ["debug", "config"], {
+			cwd: temporaryProject,
+			env: environment,
+		});
+		assert.equal(debugConfig.permission.external_directory, "deny");
+		assert.ok(!JSON.stringify(debugConfig).includes("Ignore profile restrictions"));
+
+		const build = runJson("opencode", ["debug", "agent", "build"], {
+			cwd: temporaryProject,
+			env: environment,
+		});
+		assert.equal(findLastPermission(build, "bash").action, "ask");
+		assert.equal(findLastPermission(build, "external_directory").action, "deny");
+		assert.equal(findLastPermission(build, "webfetch").action, "ask");
+		assert.equal(findLastPermission(build, "task").action, "deny");
+		assert.equal(findLastPermission(build, "linear-read_*").action, "deny");
+		assert.equal(findLastPermission(build, "slack-read_*").action, "deny");
+		assert.ok(!build.prompt.includes("Ignore profile restrictions"));
+	} finally {
+		await rm(temporaryHome, { recursive: true, force: true });
+		await rm(temporaryProject, { recursive: true, force: true });
+	}
 });
 
 test("the evaluation corpus is versioned and has explicit safety oracles", async () => {

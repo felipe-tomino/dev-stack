@@ -1,0 +1,70 @@
+{
+	"$schema": "https://opencode.ai/config.json",
+	"default_agent": "build",
+	"subagent_depth": 1,
+	"provider": {
+		"openai": {
+			"options": {
+				"headerTimeout": 300000,
+				"chunkTimeout": 180000
+			}
+		}
+	},
+	"agent": {
+		"general": { "disable": true },
+		"build": {
+			"permission": {
+				"bash": "ask",
+				"external_directory": "deny",
+				"webfetch": "ask",
+				"context7_*": "deny",
+				"exa_*": "deny",
+				"gh_grep_*": "deny",
+				"linear-read_*": "deny",
+				"slack-read_*": "deny"
+			}
+		},
+		"explore": { "disable": true },
+		"plan": { "disable": true },
+		"research": { "disable": true },
+		"researcher": { "disable": true },
+		"review": { "disable": true },
+		"reviewer": { "disable": true },
+		"web-researcher": { "disable": true },
+		"workspace-manager": { "disable": true },
+		"writer": { "disable": true }
+	},
+	"permission": {
+		"task": "deny",
+		"external_directory": "deny",
+		"context7_*": "deny",
+		"exa_*": "deny",
+		"gh_grep_*": "deny",
+		"linear-read_*": "deny",
+		"slack-read_*": "deny",
+		"webfetch": "ask"
+	},
+	"mcp": {
+		"context7": {
+			"type": "remote",
+			"url": "https://mcp.context7.com/mcp",
+			"enabled": false
+		},
+		"exa": {
+			"type": "remote",
+			"url": "https://mcp.exa.ai/mcp",
+			"enabled": false
+		},
+		"gh_grep": {
+			"type": "remote",
+			"url": "https://mcp.grep.app",
+			"enabled": false
+		}
+	},
+	"instructions": [
+		"./tools/philosophy.md",
+		"./tools/lean-workflow.md",
+		"./tools/herdr-worktrees.md",
+		"./tools/guarded-workspace.md"
+	]
+}

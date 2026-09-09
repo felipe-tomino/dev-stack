@@ -1,0 +1,15 @@
+{
+	"$schema": "https://ocx.kdco.dev/schemas/profile.json",
+	"registries": {
+		"kdco": { "url": "https://registry.kdco.dev" }
+	},
+	"renameWindow": true,
+	"exclude": [
+		"**/.opencode/**",
+		"**/opencode.json",
+		"**/opencode.jsonc",
+		"**/AGENTS.md",
+		"**/CLAUDE.md",
+		"**/CONTEXT.md"
+	]
+}
