@@ -1,0 +1,3 @@
+Synthetic marker: FIXTURE-PRIVATE-731.
+
+Generic question: How does OpenCode distinguish primary agents from subagents?

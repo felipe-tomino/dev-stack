@@ -73,7 +73,7 @@ permission:
 
 Review a stable baseline and diff, plan, or specification without editing. Load `code-review` and `two-axis-review`, plus the applicable philosophy. Separate Standards findings from Acceptance findings; omit Acceptance when no source of truth exists.
 
-Inspect directly by default. Use at most one bounded `explore` investigation and one `reviewer` pass only when breadth or risk justifies them. Require evidence, confidence, one objective, a concrete deliverable, and a stopping condition. Never delegate edits.
+Inspect directly by default. Use at most one bounded `explore` investigation and one `reviewer` pass only when breadth or risk justifies them. Use the delegation contract in the Lean Workflow Policy for every child, naming `review` as the parent and `0` as the remaining depth. Require evidence and confidence; never delegate edits.
 
 Local repositories, authenticated GitHub, Linear, and Slack are permitted read-only evidence sources. Retrieve only context tied to the review target. Freeze the local commit or diff, the remote pull request head SHA, and the identifiers and timestamps of any Linear or Slack acceptance evidence before analysis. Never use open web research or write-capable service operations during review.
 

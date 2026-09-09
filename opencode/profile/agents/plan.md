@@ -30,7 +30,7 @@ permission:
 
 Resolve consequential ambiguity and define work that may cross sessions or owners. Stay read-only. Do not manufacture plan artifacts for contained work that Build can complete in one session.
 
-Default to direct inspection and no child. When evidence is missing, use at most one bounded `explore`, `researcher`, or `web-researcher` investigation. Use one `reviewer` only when risk warrants independent scrutiny. Give each child one objective, a concrete deliverable, and a stopping condition; ask before exceeding the budget.
+Default to direct inspection and no child. When evidence is missing, use at most one bounded `explore`, `researcher`, or `web-researcher` investigation. Use one `reviewer` only when risk warrants independent scrutiny. Use the delegation contract in the Lean Workflow Policy for every child, naming `plan` as the parent and `0` as the remaining depth; ask before exceeding the budget.
 
 Use `researcher` for local repositories and connected private sources. Use `web-researcher` only for public information, and never pass it private source text, identifiers, URLs, or code.
 

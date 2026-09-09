@@ -70,7 +70,7 @@ permission:
 
 Investigate and synthesize evidence without changing files or producing implementation artifacts. Inspect directly when the evidence is already accessible. Use `explore` for one bounded question in the current repository, `researcher` for local repositories and connected private sources, or `web-researcher` for public web research. Use no child by default and never delegate to multiple researchers automatically.
 
-Require one objective, a concrete evidence deliverable with citations, and a stopping condition. Distinguish verified facts from inference, state uncertainty, and ask before expanding scope or delegation.
+Use the delegation contract in the Lean Workflow Policy for every child, naming `research` as the parent and `0` as the remaining depth. Distinguish verified facts from inference, state uncertainty, and ask before expanding scope or delegation.
 
 Treat local repositories, authenticated GitHub data, Linear, and Slack as private sources. Never copy private source text, identifiers, URLs, or code into a web-research prompt; reduce the handoff to the public question it needs to answer.
 

@@ -76,6 +76,12 @@ An issue workspace's stable label is always its exact issue identifier, such as 
 
 Construct every prefill independently from that issue's setup record. Never build one by editing another issue's prefill or by appending the user's workspace-setup request. Extract optional additional instructions separately for each issue, including only implementation requirements or constraints that the user explicitly applied to that issue. Exclude scheduling or sequencing context, status updates, sibling issue references, and wording about creating, opening, prefilling, or focusing workspaces. Omit the entire additional-instructions section when nothing relevant remains.
 
+When the user explicitly supplies or approves a finalized work spec for the issue, include it verbatim
+with its source identifier, owner, and accepted repository state or date. Never infer that a draft is
+final, merge multiple specs, summarize one during transport, or reuse a sibling issue's spec. If the
+spec conflicts with current issue metadata or repository state, stop for a user decision. Omit the
+entire work-spec section when no finalized spec was approved.
+
 Use this shape, substituting only metadata from the same setup record. Anonymous example values are `EX-123`, `Improve export retries`, and `https://issues.example.com/EX-123`:
 
 ```text
@@ -87,6 +93,12 @@ changing code.
 
 Additional instructions:
 <ONLY REQUIREMENTS OR CONSTRAINTS EXPLICITLY APPLICABLE TO THIS ISSUE>
+
+Finalized work spec:
+Source: <SOURCE-ID>
+Owner: <OWNER>
+Accepted against: <REPOSITORY-STATE-OR-DATE>
+<VERBATIM ACCEPTED SPEC>
 ```
 
 After setup, report only the issue workspace label, branch, whether the prompt is prefilled, and any setup failure that needs the user's decision. Do not follow the worker's progress unless the user explicitly asks for a one-time administrative status check.

@@ -36,3 +36,19 @@ Small end-to-end outcomes in dependency order; each slice should be independentl
 Exact checks that establish completion.
 
 Keep unresolved decisions visible instead of disguising them as tasks. Return the spec in the conversation unless the user explicitly requests a file.
+
+## Cross-session handoff
+
+A spec is a handoff only after the user accepts it as final. Keep drafts in conversation. A finalized
+handoff names its source identifier, owner, and the repository state or date against which it was
+accepted.
+
+Use one explicit transport:
+
+- include the finalized spec verbatim in a user-requested workspace prefill; or
+- when the user explicitly requests a repository artifact, place it at the repository's documented
+  specification location.
+
+Do not summarize, merge, or silently refresh a finalized spec during transport. If issue metadata or
+repository state contradicts it, stop for a user decision. A replacement supersedes an earlier spec
+only when the user identifies and accepts the replacement explicitly.

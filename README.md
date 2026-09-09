@@ -93,7 +93,15 @@ Connected data is sent to the configured model provider when an agent reads it. 
 
 External local paths require permission by default, so one project does not receive access to sibling repositories or parent directories. A project can declare narrow exceptions in its own `.opencode/opencode.jsonc`; this repository allows its owned Herdr configuration, installed `ws` profile, TUI configuration, and TUI plugins. Read-only agents cannot edit files or run unrestricted shell commands. Build may edit the current project and project-specific external roots, but its unrestricted shell is a trusted capability rather than an OS-level filesystem sandbox. Workspace Manager may run only the allowlisted Herdr and Git setup commands. These are personal trust choices, not recommended defaults for an unfamiliar environment.
 
-Run `node --test opencode/profile/permissions.test.mjs` after changing profile or project permissions. The regression test checks global and project external roots, read-only Git restrictions, Build's trust boundary, Workspace Manager's mutation surface, and Web Researcher's local-data isolation.
+Run `node --test opencode/profile/permissions.test.mjs` after changing profile or project permissions.
+Use `REQUIRE_OCX_RUNTIME=1` when runtime integration is required; missing OCX or OpenCode binaries then
+fail instead of skipping integration checks. The suite checks global and project external roots,
+read-only Git restrictions, delegation contracts, Build's trust boundary, Workspace Manager's
+mutation surface, and Web Researcher's local-data isolation.
+
+The hybrid harness protocol in `opencode/profile/evals/` adds repeatable live prompts and a manual
+scorecard for behavior that static permission assertions cannot establish. Keep actual run records,
+model assignments, and transcripts outside this public snapshot.
 
 ## Local customization
 

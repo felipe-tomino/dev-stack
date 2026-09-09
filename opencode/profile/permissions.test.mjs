@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 const profileDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(profileDirectory, "../..");
 const agentDirectory = path.join(profileDirectory, "agents");
+const requireRuntime = process.env.REQUIRE_OCX_RUNTIME === "1";
 
 const externalRoots = {
 	"~/.config/ghostty/config": "allow",
@@ -42,6 +43,8 @@ const safeGitMetadataPatterns = [
 	"git branch --list *",
 	"git remote get-url origin",
 ];
+const delegatingAgents = ["build", "plan", "research", "review"];
+const childAgents = ["explore", "researcher", "reviewer", "web-researcher"];
 const readOnlyAgents = [
 	"explore",
 	"plan",
@@ -111,6 +114,19 @@ function runJson(command, args, options = {}) {
 	});
 	assert.equal(result.status, 0, result.stderr || `${command} exited with ${result.status}`);
 	return JSON.parse(result.stdout);
+}
+
+function hasRuntimeCommand(command) {
+	return !spawnSync(command, ["--version"], { encoding: "utf8" }).error;
+}
+
+function requireRuntimeCommand(t, command) {
+	if (hasRuntimeCommand(command)) return true;
+	if (requireRuntime) {
+		assert.fail(`${command} is required when REQUIRE_OCX_RUNTIME=1`);
+	}
+	t.skip(`${command} is not installed`);
+	return false;
 }
 
 test("the profile has no global external filesystem roots", async () => {
@@ -208,10 +224,7 @@ test("Writer cannot redirect GitHub output into files", async () => {
 });
 
 test("OCX resolves external roots only for dev-stack", async (t) => {
-	if (spawnSync("ocx", ["--version"]).error?.code === "ENOENT") {
-		t.skip("OCX is not installed");
-		return;
-	}
+	if (!requireRuntimeCommand(t, "ocx")) return;
 
 	const projectConfig = runJson("ocx", ["config", "show", "--profile", "ws", "--json"]);
 	assert.deepEqual(projectConfig.opencode.permission.external_directory, externalRoots);
@@ -228,14 +241,8 @@ test("OCX resolves external roots only for dev-stack", async (t) => {
 });
 
 test("OpenCode applies project external roots after a read-only agent deny-all", (t) => {
-	if (spawnSync("ocx", ["--version"]).error?.code === "ENOENT") {
-		t.skip("OCX is not installed");
-		return;
-	}
-	if (spawnSync("opencode", ["--version"]).error?.code === "ENOENT") {
-		t.skip("OpenCode is not installed");
-		return;
-	}
+	if (!requireRuntimeCommand(t, "ocx")) return;
+	if (!requireRuntimeCommand(t, "opencode")) return;
 
 	const resolved = runJson("ocx", ["config", "show", "--profile", "ws", "--json"]);
 	const environment = { ...process.env };
@@ -322,11 +329,91 @@ test("Workspace Manager cannot remove worktrees or submit worker prompts", async
 	assert.ok(!bashRules.some((rule) => rule.pattern.startsWith("herdr agent prompt") && rule.action === "allow"));
 	assert.match(manager, /Never remove a worktree or discard state without explicit approval/);
 	assert.match(manager, /Do not submit work with `herdr agent prompt`/);
+	assert.match(manager, /include it verbatim/);
+	assert.match(manager, /source identifier, owner, and accepted repository state or date/);
+});
+
+test("work specs define one explicit finalized handoff transport", async () => {
+	const workSpec = await readFile(
+		path.join(profileDirectory, "skills/work-spec/SKILL.md"),
+		"utf8",
+	);
+	assert.match(workSpec, /only after the user accepts it as final/);
+	assert.match(workSpec, /include the finalized spec verbatim/);
+	assert.match(workSpec, /explicitly requests a repository artifact/);
+	assert.match(workSpec, /replacement explicitly/);
 });
 
 test("Web Researcher has no local read or private integration permissions", async () => {
 	const { topLevel } = parseAgentPermissions(await readAgent("web-researcher"));
 	for (const permission of ["read", "glob", "grep", "linear-read_*", "slack-read_*"]) {
 		assert.notEqual(topLevel.get(permission), "allow");
+	}
+});
+
+test("delegating agents use the canonical child contract", async () => {
+	const workflow = await readFile(path.join(profileDirectory, "tools/lean-workflow.md"), "utf8");
+	const normalizedWorkflow = workflow.replaceAll(/\s+/g, " ");
+	for (const field of [
+		"bounded objective",
+		"concrete deliverable",
+		"stopping condition",
+		"allowed source and tool scope",
+		"parent role",
+		"remaining delegation depth",
+	]) {
+		assert.match(normalizedWorkflow, new RegExp(field));
+	}
+	for (const outcome of ["completed", "blocked", "needs-parent-decision"]) {
+		assert.ok(normalizedWorkflow.includes(`\`Outcome: ${outcome}\``));
+	}
+
+	for (const agentName of delegatingAgents) {
+		const agent = await readAgent(agentName);
+		assert.match(agent, /delegation contract in the Lean Workflow Policy/);
+		assert.ok(
+			agent.includes(`naming \`${agentName}\` as the parent and \`0\` as the remaining depth`),
+		);
+	}
+});
+
+test("child agents report a supported terminal outcome", async () => {
+	for (const agentName of childAgents) {
+		const agent = await readAgent(agentName);
+		for (const outcome of ["completed", "blocked", "needs-parent-decision"]) {
+			assert.match(agent, new RegExp(`Outcome: ${outcome}`));
+		}
+	}
+});
+
+test("Explore has the evidence-backed pilot step ceiling", async () => {
+	const explore = await readAgent("explore");
+	assert.match(explore, /^steps: 8$/m);
+});
+
+test("OpenCode resolves Explore's pilot step ceiling", (t) => {
+	if (!requireRuntimeCommand(t, "opencode")) return;
+	const environment = {
+		...process.env,
+		OPENCODE_CONFIG_DIR: profileDirectory,
+		OPENCODE_DISABLE_PROJECT_CONFIG: "true",
+	};
+	delete environment.OCX_CONTEXT;
+	const explore = runJson("opencode", ["debug", "agent", "explore"], { env: environment });
+	assert.equal(explore.steps, 8);
+});
+
+test("the evaluation corpus is versioned and has explicit safety oracles", async () => {
+	const corpus = await readJson("opencode/profile/evals/scenarios.json");
+	assert.equal(corpus.version, 1);
+	assert.equal(corpus.repetitions, 3);
+	assert.deepEqual(corpus.qualityScale, [0, 1, 2, 3]);
+	assert.equal(new Set(corpus.scenarios.map((scenario) => scenario.id)).size, corpus.scenarios.length);
+	for (const scenario of corpus.scenarios) {
+		assert.ok(scenario.id);
+		assert.ok(scenario.agent);
+		assert.ok(scenario.fixture);
+		assert.ok(scenario.prompt);
+		assert.ok(scenario.critical.length > 0);
 	}
 });

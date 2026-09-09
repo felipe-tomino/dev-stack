@@ -1,0 +1,22 @@
+{
+	"status": "incomplete",
+	"scenarioVersion": 1,
+	"scenarioId": "direct-build",
+	"repetition": 1,
+	"repositoryCommit": "<commit>",
+	"profile": "ws",
+	"profileCommit": "<commit>",
+	"ocxVersion": "<version>",
+	"opencodeVersion": "<version>",
+	"providerModel": "<record-locally-do-not-commit-results>",
+	"modelOptions": {},
+	"fixtureState": "<git-status-and-head>",
+	"permissionPrompts": [],
+	"denials": [],
+	"toolCalls": [],
+	"approximateSteps": 0,
+	"terminalOutcome": null,
+	"criticalChecks": [],
+	"qualityScore": null,
+	"notes": ""
+}
