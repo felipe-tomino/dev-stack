@@ -13,8 +13,8 @@ It is not a package, supported installer, or reproducible machine definition. Th
 | `atuin/` | Search, workspace, AI, and daemon preferences |
 | `yazi/` | Previewers, keymap, and package selections |
 | `opencode/profile/` | The `ws` OCX/OpenCode profile, agents, skills, and workflow instructions |
-| `opencode/tui-plugins/` | Session-fork and Hunk review controls for OpenCode running inside Herdr |
-| `opencode/tui.jsonc` | TUI plugin registration and built-in fork keybinding |
+| `opencode/tui-plugins/` | Hunk review controls for OpenCode running inside Herdr |
+| `opencode/tui.jsonc` | TUI plugin registration |
 
 Hunk is part of the stack but has no authored application configuration. The OpenCode profile includes a repository-owned Hunk launcher and constrained pair-review workflow. Credentials, histories, databases, caches, logs, sockets, backups, package-manager state, and vendor-generated files do not belong in this repository.
 
@@ -38,7 +38,7 @@ Then copy the authored snapshot into the profile:
 cp -R opencode/profile/. "$HOME/.config/opencode/profiles/ws/"
 ```
 
-To use this profile by default in new shells, add this to the shell configuration. The launcher makes OCX and session forks read the stable installed profile instead of retaining an OCX temporary snapshot:
+To use this profile by default in new shells, add this to the shell configuration. The launcher makes OCX read the stable installed profile instead of retaining an OCX temporary snapshot:
 
 ```bash
 export OCX_PROFILE=ws
@@ -60,7 +60,6 @@ Install Herdr's vendor-managed hooks before copying the repository-owned TUI fil
 ```bash
 herdr integration install opencode
 mkdir -p "$HOME/.config/opencode/tui-plugins"
-cp opencode/tui-plugins/session-forks.js "$HOME/.config/opencode/tui-plugins/session-forks.js"
 cp opencode/tui-plugins/herdr-tui.js "$HOME/.config/opencode/tui-plugins/herdr-tui.js"
 cp opencode/tui-plugins/hunk-review.js "$HOME/.config/opencode/tui-plugins/hunk-review.js"
 cp opencode/tui.jsonc "$HOME/.config/opencode/tui.jsonc"
@@ -140,7 +139,6 @@ The custom plugins use only Node.js built-ins:
 node --test opencode/profile/tool-execution-guard.test.js
 node --test opencode/profile-sync.test.mjs
 node --test opencode/tui-plugins/herdr-tui.test.js
-node --test opencode/tui-plugins/session-forks.test.js
 node --test opencode/tui-plugins/hunk-review.test.js
 ```
 

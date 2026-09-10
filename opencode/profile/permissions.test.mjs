@@ -21,7 +21,6 @@ const externalRoots = {
 	"~/.config/opencode/profiles/ws/**": "allow",
 	"~/.config/opencode/tui-plugins/herdr-tui.js": "allow",
 	"~/.config/opencode/tui-plugins/hunk-review.js": "allow",
-	"~/.config/opencode/tui-plugins/session-forks.js": "allow",
 	"~/.config/opencode/tui.jsonc": "allow",
 };
 

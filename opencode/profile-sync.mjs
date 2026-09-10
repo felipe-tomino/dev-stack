@@ -11,7 +11,7 @@ import { executeHerdr, quoteShellArgument, waitForPaneShell } from "./tui-plugin
 
 const executeFile = promisify(execFile);
 const PROFILE_NAME = "ws";
-const TUI_PLUGIN_FILES = ["herdr-tui.js", "hunk-review.js", "session-forks.js"];
+const TUI_PLUGIN_FILES = ["herdr-tui.js", "hunk-review.js"];
 
 function parseJsonDocument(contents, filePath) {
 	try {
