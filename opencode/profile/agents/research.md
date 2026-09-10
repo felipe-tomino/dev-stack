@@ -63,7 +63,10 @@ permission:
     explore: allow
     researcher: allow
     web-researcher: allow
-  skill: deny
+  skill:
+    "*": deny
+    no-ai-slop: allow
+    writing: allow
 ---
 
 # Research

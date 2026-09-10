@@ -1,0 +1,21 @@
+#!/bin/sh
+set -eu
+
+profile_name="${OCX_PROFILE:-ws}"
+profile_directory="${OPENCODE_PROFILE_DIR:-$HOME/.config/opencode/profiles/$profile_name}"
+profile_config="$profile_directory/opencode.jsonc"
+
+if [ ! -f "$profile_config" ]; then
+	printf 'OpenCode profile config not found: %s\n' "$profile_config" >&2
+	exit 1
+fi
+
+unset OPENCODE_CONFIG_CONTENT
+unset OPENCODE_DISABLE_GLOBAL_CONFIG
+unset OPENCODE_DISABLE_PROJECT_CONFIG
+export OCX_PROFILE="$profile_name"
+export OPENCODE_BIN="$profile_directory/bin/opencode-ws"
+export OPENCODE_CONFIG="$profile_config"
+export OPENCODE_CONFIG_DIR="$profile_directory"
+
+exec "${OPENCODE_REAL_BIN:-opencode}" "$@"

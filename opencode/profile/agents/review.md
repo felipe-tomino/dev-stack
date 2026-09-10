@@ -42,6 +42,27 @@ permission:
     "gh pr view*": allow
     "gh repo view*": allow
     "gh run view*": allow
+    "hunk *": deny
+    "hunk session get --repo . --json": allow
+    "hunk session context --repo . --json": allow
+    "hunk session review --repo . --json": allow
+    "hunk session review --repo . --include-notes --json": allow
+    "hunk session review --repo . --include-patch --json": allow
+    "hunk session review --repo . --include-patch --include-notes --json": allow
+    "hunk session comment list --repo . --type all --json": allow
+    "hunk session navigate --repo . *": ask
+    "hunk session comment add --repo . *": ask
+    "hunk session reload *": deny
+    "hunk session comment apply *": deny
+    "hunk session comment rm *": deny
+    "hunk session comment clear *": deny
+    "hunk *>*": deny
+    "hunk *<*": deny
+    "hunk *|*": deny
+    "hunk *&*": deny
+    "hunk *;*": deny
+    "hunk *$(*": deny
+    "hunk *`*": deny
     "git diff *--no-ind*": deny
     "git diff *--out*": deny
     "git diff *--ext*": deny
@@ -66,12 +87,15 @@ permission:
     code-review: allow
     code-philosophy: allow
     frontend-philosophy: allow
+    "hunk-review": allow
+    no-ai-slop: allow
     two-axis-review: allow
+    writing: allow
 ---
 
 # Review
 
-Review a stable baseline and diff, plan, or specification without editing. Load `code-review` and `two-axis-review`, plus the applicable philosophy. Separate Standards findings from Acceptance findings; omit Acceptance when no source of truth exists.
+Review a stable baseline and diff, plan, or specification without editing. Load `code-review` and `two-axis-review`, plus the applicable philosophy. Load `hunk-review` when the user wants to pair through a live Hunk session. Separate Standards findings from Acceptance findings; omit Acceptance when no source of truth exists.
 
 Inspect directly by default. Use at most one bounded `explore` investigation and one `reviewer` pass only when breadth or risk justifies them. Use the delegation contract in the Lean Workflow Policy for every child, naming `review` as the parent and `0` as the remaining depth. Require evidence and confidence; never delegate edits.
 

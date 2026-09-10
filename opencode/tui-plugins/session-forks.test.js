@@ -38,6 +38,16 @@ function createRunner(calls) {
                 },
             };
         }
+        if (args[0] === "pane" && args[1] === "process-info") {
+            return {
+                result: {
+                    process_info: {
+                        shell_pid: 101,
+                        foreground_processes: [{ pid: 101, name: "zsh" }],
+                    },
+                },
+            };
+        }
         return { result: { type: "ok" } };
     };
 }
@@ -54,12 +64,18 @@ const environment = {
     OCX_PROFILE: "ws",
 };
 
+async function waitForShell(runHerdr, paneID) {
+    await runHerdr(["pane", "process-info", "--pane", paneID]);
+    await runHerdr(["pane", "process-info", "--pane", paneID]);
+}
+
 test("registers one binding for each new-tab fork behavior", async () => {
     const harness = createApi();
     const plugin = createSessionForkPlugin({
         environment,
         cwd: "/repo",
         runHerdr: createRunner([]),
+        waitForShell,
     });
 
     await plugin.tui(harness.api);
@@ -95,6 +111,7 @@ test("starts a fork in a background Herdr tab with the active profile environmen
         environment,
         cwd: "/repo with spaces",
         runHerdr: createRunner(calls),
+        waitForShell,
     });
 
     await plugin.tui(harness.api);
@@ -118,6 +135,8 @@ test("starts a fork in a background Herdr tab with the active profile environmen
             "--env",
             "OPENCODE_DISABLE_PROJECT_CONFIG=true",
         ],
+        ["pane", "process-info", "--pane", "w14:p2"],
+        ["pane", "process-info", "--pane", "w14:p2"],
         [
             "pane",
             "run",
@@ -141,6 +160,7 @@ test("focuses a new tab only after its fork command starts", async () => {
         environment,
         cwd: "/repo",
         runHerdr: createRunner(calls),
+        waitForShell,
     });
 
     await plugin.tui(harness.api);
@@ -150,17 +170,19 @@ test("focuses a new tab only after its fork command starts", async () => {
         calls.map((args) => args.slice(0, 2)),
         [
             ["tab", "create"],
+            ["pane", "process-info"],
+            ["pane", "process-info"],
             ["pane", "run"],
             ["tab", "focus"],
         ],
     );
-    assert.deepEqual(calls[1], [
+    assert.deepEqual(calls[3], [
         "pane",
         "run",
         "w14:p2",
         "'/opt/opencode/bin/opencode' --session 'ses_parent' --fork",
     ]);
-    assert.deepEqual(calls[2], ["tab", "focus", "w14:t2"]);
+    assert.deepEqual(calls[4], ["tab", "focus", "w14:t2"]);
 });
 
 test("does not report a focused fork as successful when focusing fails", async () => {
@@ -177,7 +199,7 @@ test("does not report a focused fork as successful when focusing fails", async (
         if (args[0] === "tab" && args[1] === "focus") throw new Error("Could not focus the tab.");
         return { result: { type: "ok" } };
     };
-    const plugin = createSessionForkPlugin({ environment, cwd: "/repo", runHerdr });
+    const plugin = createSessionForkPlugin({ environment, cwd: "/repo", runHerdr, waitForShell });
 
     await plugin.tui(harness.api);
     await harness.commands().find(({ name }) => name === "session.forks.focus").run();
@@ -201,13 +223,14 @@ test("shell-quotes the OpenCode executable used in the new pane", async () => {
         },
         cwd: "/repo",
         runHerdr: createRunner(calls),
+        waitForShell,
     });
 
     await plugin.tui(harness.api);
     await harness.commands().find(({ name }) => name === "session.forks.background").run();
 
     assert.equal(
-        calls[1][3],
+        calls[3][3],
         "'/opt/open code'\"'\"'s/opencode; unsafe' --session 'ses_parent' --fork",
     );
 });
@@ -219,6 +242,7 @@ test("does not create a tab outside Herdr", async () => {
         environment: {},
         cwd: "/repo",
         runHerdr: createRunner(calls),
+        waitForShell,
     });
 
     await plugin.tui(harness.api);
@@ -256,6 +280,7 @@ test("keeps fork graph navigation available in the current tab", async () => {
         environment,
         cwd: "/repo",
         runHerdr: createRunner([]),
+        waitForShell,
     });
 
     await plugin.tui(harness.api);
@@ -291,6 +316,7 @@ test("reports an inconsistent fork graph instead of navigating to the wrong sibl
         environment,
         cwd: "/repo",
         runHerdr: createRunner([]),
+        waitForShell,
     });
 
     await plugin.tui(harness.api);

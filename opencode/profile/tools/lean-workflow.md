@@ -18,3 +18,4 @@
   unclear ownership, or orphaned worktrees justify tracking owner, purpose, base revision, affected
   areas, validation, integration, and cleanup state.
 - Create durable specifications only for multi-session or handoff work. Require independent review only by risk or explicit request.
+- When producing or editing communication intended for use outside the current chat, keep substantive ownership with the active primary agent and load the `writing` skill. Writing transforms established context; it does not transfer ownership or authorize new research, decisions, findings, or implementation.

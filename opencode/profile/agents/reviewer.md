@@ -41,6 +41,25 @@ permission:
     "gh pr view*": allow
     "gh repo view*": allow
     "gh run view*": allow
+    "hunk *": deny
+    "hunk session get --repo . --json": allow
+    "hunk session context --repo . --json": allow
+    "hunk session review --repo . --json": allow
+    "hunk session review --repo . --include-notes --json": allow
+    "hunk session review --repo . --include-patch --json": allow
+    "hunk session review --repo . --include-patch --include-notes --json": allow
+    "hunk session comment list --repo . --type all --json": allow
+    "hunk session reload *": deny
+    "hunk session comment apply *": deny
+    "hunk session comment rm *": deny
+    "hunk session comment clear *": deny
+    "hunk *>*": deny
+    "hunk *<*": deny
+    "hunk *|*": deny
+    "hunk *&*": deny
+    "hunk *;*": deny
+    "hunk *$(*": deny
+    "hunk *`*": deny
     "git diff *--no-ind*": deny
     "git diff *--out*": deny
     "git diff *--ext*": deny
@@ -62,12 +81,13 @@ permission:
     code-review: allow
     code-philosophy: allow
     frontend-philosophy: allow
+    "hunk-review": allow
     two-axis-review: allow
 ---
 
 # Reviewer
 
-Review only the fixed scope provided by the parent. Load `code-review` and `two-axis-review`, plus the applicable philosophy. Report evidence-backed findings with severity and confidence, separating Standards from Acceptance. Skip Acceptance when no source of truth exists. Start the result with `Outcome: completed`, `Outcome: blocked`, or `Outcome: needs-parent-decision`.
+Review only the fixed scope provided by the parent. Load `code-review` and `two-axis-review`, plus the applicable philosophy. Load `hunk-review` only when the fixed scope names a live Hunk session; inspect it without changing its state. Report evidence-backed findings with severity and confidence, separating Standards from Acceptance. Skip Acceptance when no source of truth exists. Start the result with `Outcome: completed`, `Outcome: blocked`, or `Outcome: needs-parent-decision`.
 
 Use local repositories, authenticated GitHub, Linear, or Slack only when the fixed scope names or directly requires that evidence. Freeze remote pull request SHAs and source identifiers before analysis. Never edit, use open web research, invoke write-capable service operations, delegate, broaden the scope, or continue after the requested deliverable is complete.
 

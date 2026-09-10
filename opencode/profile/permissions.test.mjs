@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, readdir, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -19,6 +19,8 @@ const externalRoots = {
 	"~/.config/yazi/package.toml": "allow",
 	"~/.config/yazi/yazi.toml": "allow",
 	"~/.config/opencode/profiles/ws/**": "allow",
+	"~/.config/opencode/tui-plugins/herdr-tui.js": "allow",
+	"~/.config/opencode/tui-plugins/hunk-review.js": "allow",
 	"~/.config/opencode/tui-plugins/session-forks.js": "allow",
 	"~/.config/opencode/tui.jsonc": "allow",
 };
@@ -29,8 +31,6 @@ const externalReaders = [
 	"researcher",
 	"review",
 	"reviewer",
-	"workspace-manager",
-	"writer",
 ];
 
 const gitReaders = ["research", "researcher", "review", "reviewer"];
@@ -45,6 +45,21 @@ const safeGitMetadataPatterns = [
 ];
 const delegatingAgents = ["build", "plan", "research", "review"];
 const childAgents = ["explore", "researcher", "reviewer", "web-researcher"];
+const hunkReadPatterns = [
+	"hunk session get --repo . --json",
+	"hunk session context --repo . --json",
+	"hunk session review --repo . --json",
+	"hunk session review --repo . --include-notes --json",
+	"hunk session review --repo . --include-patch --json",
+	"hunk session review --repo . --include-patch --include-notes --json",
+	"hunk session comment list --repo . --type all --json",
+];
+const hunkStateMutationPatterns = [
+	"hunk session reload *",
+	"hunk session comment apply *",
+	"hunk session comment rm *",
+	"hunk session comment clear *",
+];
 const readOnlyAgents = [
 	"explore",
 	"plan",
@@ -53,8 +68,6 @@ const readOnlyAgents = [
 	"review",
 	"reviewer",
 	"web-researcher",
-	"workspace-manager",
-	"writer",
 ];
 
 async function readJson(relativePath) {
@@ -64,6 +77,17 @@ async function readJson(relativePath) {
 
 async function readAgent(agentName) {
 	return readFile(path.join(agentDirectory, `${agentName}.md`), "utf8");
+}
+
+async function listPrimaryAgentNames() {
+	const agentFiles = (await readdir(agentDirectory)).filter((file) => file.endsWith(".md"));
+	const agents = await Promise.all(
+		agentFiles.map(async (file) => ({
+			name: file.slice(0, -3),
+			definition: await readFile(path.join(agentDirectory, file), "utf8"),
+		})),
+	);
+	return agents.filter(({ definition }) => /^mode: primary$/m.test(definition)).map(({ name }) => name);
 }
 
 function parseAgentPermissions(agent) {
@@ -83,11 +107,11 @@ function parseAgentPermissions(agent) {
 		if (!inPermissions) continue;
 		if (/^[^ ]/.test(line)) break;
 
-		const nestedMatch = line.match(/^    "((?:\\.|[^"])*)": (allow|ask|deny)$/);
+		const nestedMatch = line.match(/^    (?:"((?:\\.|[^"])*)"|([^:]+)): (allow|ask|deny)$/);
 		if (section && nestedMatch) {
 			nested.get(section).push({
-				pattern: nestedMatch[1].replaceAll('\\"', '"'),
-				action: nestedMatch[2],
+				pattern: (nestedMatch[1] ?? nestedMatch[2]).replaceAll('\\"', '"'),
+				action: nestedMatch[3],
 			});
 			continue;
 		}
@@ -133,6 +157,7 @@ test("the profile has no global external filesystem roots", async () => {
 	const profile = await readJson("opencode/profile/opencode.jsonc");
 	assert.equal(profile.permission.external_directory, undefined);
 	assert.equal(profile.subagent_depth, 1);
+	assert.ok(profile.instructions.includes("./tools/tool-execution.md"));
 });
 
 test("the profile composes project-local OpenCode configuration", async () => {
@@ -216,11 +241,87 @@ test("Git evidence agents can inspect common repository metadata", async () => {
 	}
 });
 
-test("Writer cannot redirect GitHub output into files", async () => {
-	const { nested } = parseAgentPermissions(await readAgent("writer"));
-	const bashRules = nested.get("bash");
-	assert.ok(bashRules.some((rule) => rule.pattern === "gh *>*" && rule.action === "deny"));
-	assert.ok(bashRules.some((rule) => rule.pattern === "gh *<*" && rule.action === "deny"));
+test("Review roles can read only the current repository's live Hunk session", async () => {
+	for (const agentName of ["review", "reviewer"]) {
+		const { nested } = parseAgentPermissions(await readAgent(agentName));
+		const bashRules = nested.get("bash");
+		const broadDenyIndex = bashRules.findIndex(
+			(rule) => rule.pattern === "hunk *" && rule.action === "deny",
+		);
+		assert.ok(broadDenyIndex >= 0, `${agentName} must deny broad Hunk commands`);
+
+		for (const safePattern of hunkReadPatterns) {
+			const allowIndex = bashRules.findIndex(
+				(rule) => rule.pattern === safePattern && rule.action === "allow",
+			);
+			assert.ok(allowIndex > broadDenyIndex, `${agentName} cannot run ${safePattern}`);
+		}
+		assert.ok(!bashRules.some((rule) => rule.pattern === "hunk session list --json" && rule.action === "allow"));
+		assert.ok(!bashRules.some((rule) => /hunk session (?:get|context|review) \*/.test(rule.pattern)));
+
+		const skillRules = nested.get("skill");
+		assert.ok(
+			skillRules.some((rule) => rule.pattern === "hunk-review" && rule.action === "allow"),
+			`${agentName} cannot load hunk-review`,
+		);
+	}
+});
+
+test("only primary Review may request non-destructive Hunk annotations", async () => {
+	const reviewRules = parseAgentPermissions(await readAgent("review")).nested.get("bash");
+	for (const pattern of ["hunk session navigate --repo . *", "hunk session comment add --repo . *"]) {
+		assert.ok(
+			reviewRules.some((rule) => rule.pattern === pattern && rule.action === "ask"),
+			`Review must ask before ${pattern}`,
+		);
+	}
+
+	const reviewerRules = parseAgentPermissions(await readAgent("reviewer")).nested.get("bash");
+	assert.ok(!reviewerRules.some((rule) => rule.action !== "deny" && /navigate|comment add/.test(rule.pattern)));
+
+	for (const agentName of ["review", "reviewer"]) {
+		const bashRules = parseAgentPermissions(await readAgent(agentName)).nested.get("bash");
+		for (const pattern of hunkStateMutationPatterns) {
+			assert.ok(
+				bashRules.some((rule) => rule.pattern === pattern && rule.action === "deny"),
+				`${agentName} must deny ${pattern}`,
+			);
+		}
+		for (const pattern of ["hunk *>*", "hunk *<*", "hunk *|*", "hunk *&*", "hunk *;*", "hunk *$(*", "hunk *`*"]) {
+			assert.ok(
+				bashRules.some((rule) => rule.pattern === pattern && rule.action === "deny"),
+				`${agentName} must deny shell escape pattern ${pattern}`,
+			);
+		}
+	}
+});
+
+test("primary agents share writing guidance for communication used outside chat", async () => {
+	const workflow = await readFile(path.join(profileDirectory, "tools/lean-workflow.md"), "utf8");
+	const writing = await readFile(path.join(profileDirectory, "skills/writing/SKILL.md"), "utf8");
+
+	assert.match(workflow, /communication intended for use outside the current chat/);
+	assert.match(writing, /any communication intended for use outside the current chat/);
+
+	const primaryAgents = await listPrimaryAgentNames();
+	assert.ok(primaryAgents.length > 0, "the profile must define at least one primary agent");
+
+	for (const agentName of primaryAgents) {
+		const { nested } = parseAgentPermissions(await readAgent(agentName));
+		const skillRules = nested.get("skill");
+		for (const skillName of ["writing", "no-ai-slop"]) {
+			assert.ok(
+				skillRules.some((rule) => rule.pattern === skillName && rule.action === "allow"),
+				`${agentName} cannot load ${skillName}`,
+			);
+		}
+	}
+});
+
+test("retired primary agents stay removed", async () => {
+	for (const agentName of ["writer", "workspace-manager"]) {
+		await assert.rejects(readAgent(agentName), (error) => error?.code === "ENOENT");
+	}
 });
 
 test("OCX resolves external roots only for dev-stack", async (t) => {
@@ -251,6 +352,13 @@ test("OpenCode applies project external roots after a read-only agent deny-all",
 	environment.OPENCODE_CONFIG_CONTENT = JSON.stringify(resolved.opencode);
 	environment.OPENCODE_CONFIG_DIR = path.join(os.homedir(), ".config/opencode/profiles/ws");
 	environment.OPENCODE_DISABLE_PROJECT_CONFIG = "true";
+
+	const effectiveConfig = runJson("opencode", ["debug", "config"], { env: environment });
+	assert.ok(
+		effectiveConfig.plugin.some((plugin) => plugin.endsWith("/plugins/tool-execution-guard.js")),
+		"OpenCode must discover the installed tool execution guard",
+	);
+	assert.ok(effectiveConfig.instructions.includes("./tools/tool-execution.md"));
 
 	const research = runJson("opencode", ["debug", "agent", "research"], { env: environment });
 	const denyAllIndex = research.permission.findLastIndex(
@@ -307,30 +415,6 @@ test("Build is the only general write-capable agent", async () => {
 			);
 		}
 	}
-});
-
-test("Workspace Manager cannot remove worktrees or submit worker prompts", async () => {
-	const manager = await readAgent("workspace-manager");
-	const { nested } = parseAgentPermissions(manager);
-	const bashRules = nested.get("bash");
-	for (const safePattern of [
-		"git branch --list *",
-		"git rev-parse --show-toplevel",
-		"git symbolic-ref refs/remotes/origin/HEAD",
-		"git symbolic-ref --short refs/remotes/origin/HEAD",
-		"git status --short",
-	]) {
-		assert.ok(
-			bashRules.some((rule) => rule.pattern === safePattern && rule.action === "allow"),
-			`Workspace Manager cannot run ${safePattern}`,
-		);
-	}
-	assert.ok(!bashRules.some((rule) => rule.pattern.startsWith("herdr worktree remove") && rule.action === "allow"));
-	assert.ok(!bashRules.some((rule) => rule.pattern.startsWith("herdr agent prompt") && rule.action === "allow"));
-	assert.match(manager, /Never remove a worktree or discard state without explicit approval/);
-	assert.match(manager, /Do not submit work with `herdr agent prompt`/);
-	assert.match(manager, /include it verbatim/);
-	assert.match(manager, /source identifier, owner, and accepted repository state or date/);
 });
 
 test("work specs define one explicit finalized handoff transport", async () => {

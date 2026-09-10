@@ -23,7 +23,9 @@ permission:
     "*": deny
     code-philosophy: allow
     frontend-philosophy: allow
+    no-ai-slop: allow
     work-spec: allow
+    writing: allow
 ---
 
 # Plan

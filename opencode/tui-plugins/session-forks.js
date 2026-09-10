@@ -1,9 +1,12 @@
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
+import {
+    executeHerdr,
+    quoteShellArgument,
+    requireCreatedTab,
+    waitForPaneShell,
+} from "./herdr-tui.js";
 
-const PLUGIN_ID = "felipe-tomino.session-forks";
+const PLUGIN_ID = "dev-stack.session-forks";
 const COMMAND_NAMESPACE = "session.forks";
-const executeFile = promisify(execFile);
 
 const FORK_ENVIRONMENT_KEYS = [
     "OCX_BIN",
@@ -88,47 +91,13 @@ function inheritedForkEnvironment(environment) {
     });
 }
 
-function quoteShellArgument(value) {
-    return `'${value.replaceAll("'", `'"'"'`)}'`;
-}
-
 function opencodeForkCommand(environment, sessionID) {
     const executable = environment.OPENCODE_BIN || "opencode";
     return `${quoteShellArgument(executable)} --session ${quoteShellArgument(sessionID)} --fork`;
 }
 
-function requireCreatedTab(response) {
-    const tabID = response?.result?.tab?.tab_id;
-    const paneID = response?.result?.root_pane?.pane_id;
-    if (typeof tabID !== "string" || typeof paneID !== "string") {
-        throw new Error("Herdr created a tab without returning its tab and pane identifiers.");
-    }
-    return { tabID, paneID };
-}
-
-async function executeHerdr(args) {
-    let stdout;
-    try {
-        ({ stdout } = await executeFile("herdr", args, {
-            encoding: "utf8",
-            maxBuffer: 1024 * 1024,
-        }));
-    } catch (error) {
-        const stderr = typeof error?.stderr === "string" ? error.stderr.trim() : "";
-        throw new Error(stderr || "Herdr command failed.");
-    }
-
-    const output = stdout.trim();
-    if (!output) return undefined;
-    try {
-        return JSON.parse(output);
-    } catch {
-        throw new Error("Herdr returned an unreadable response.");
-    }
-}
-
 async function forkToNewTab(api, dependencies, focus) {
-    const { environment, cwd, runHerdr } = dependencies;
+    const { environment, cwd, runHerdr, waitForShell } = dependencies;
     const sessionID = currentSessionID(api);
     if (!sessionID) {
         showToast(api, "warning", "Open a session before creating a tab fork.");
@@ -157,6 +126,7 @@ async function forkToNewTab(api, dependencies, focus) {
     ]);
     const { tabID, paneID } = requireCreatedTab(created);
 
+    await waitForShell(runHerdr, paneID);
     await runHerdr(["pane", "run", paneID, opencodeForkCommand(environment, sessionID)]);
     if (focus) await runHerdr(["tab", "focus", tabID]);
     showToast(api, "success", focus ? "Fork started in focused tab." : "Fork started in background tab.");
@@ -170,6 +140,7 @@ export function createSessionForkPlugin({
     environment = process.env,
     cwd = process.cwd(),
     runHerdr = executeHerdr,
+    waitForShell = waitForPaneShell,
 } = {}) {
     return {
         id: PLUGIN_ID,
@@ -192,7 +163,7 @@ export function createSessionForkPlugin({
                 }
             };
 
-            const dependencies = { environment, cwd, runHerdr };
+            const dependencies = { environment, cwd, runHerdr, waitForShell };
             api.keymap.registerLayer({
                 bindings: [
                     {
