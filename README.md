@@ -97,6 +97,8 @@ The profile keeps one direct implementation owner and bounded read-only helpers:
 
 Build treats a clear low-risk request as authorization for the requested workspace edit. It asks before consequential ambiguity, destructive or irreversible work, external side effects, material architecture choices, or scope expansion. Commit, push, pull-request, and publication actions always require separate authorization. Every implementation keeps a proportionate session-local work spec; repository specification files are created only when explicitly requested.
 
+Before publishing to a public repository, Build inspects the complete outgoing change for private or identifying material. An explicit push request covers reviewed attribution required by third-party licenses and provenance for public sources, so that attribution does not trigger a second confirmation. Unrelated personal information, including names, private identifiers or URLs, credentials, and private conversation excerpts, remains blocked until removed or explicitly resolved.
+
 Repository-owned philosophy skills follow the nearest project contracts and patterns before proposing new abstractions or visual language. The separate **Testing Philosophy** skill guides whether and where tests add useful evidence; **TDD Seams** remains an optional workflow for observable behavior with an independent oracle.
 
 When any primary agent produces or edits communication intended for use outside the current chat, it loads the shared **Writing** skill. The active agent keeps ownership of the underlying facts, decisions, findings, or implementation while the skill shapes that established context into ready-to-use communication.

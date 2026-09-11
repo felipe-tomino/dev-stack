@@ -70,6 +70,21 @@ test("Build uses risk-based confirmation, work specs, proportional tests, and Co
 	assert.match(build, /when the user asks to review the approach first/);
 	assert.match(build, /destructive, irreversible, externally visible, or high cost/);
 	assert.match(build, /Commit, push, pull-request, publication, and external-path authorization remain separate/);
+	assert.match(build, /explicit request to push to a known public repository covers reviewed names/);
+	assert.match(build, /required by third-party licenses or needed to identify public sources/);
+	assert.match(build, /do not ask again solely because that attribution is present/);
+	assert.match(build, /Repository ownership or implementation authorization alone does not authorize publication/);
+	assert.match(build, /Do not publish unrelated personal information/);
+	for (const protectedCategory of [
+		"personal names",
+		"company or client identifiers",
+		"internal issue identifiers",
+		"private URLs",
+		"credentials",
+		"excerpts from private conversations",
+	]) {
+		assert.match(build, new RegExp(protectedCategory));
+	}
 	assert.match(build, /session-local work spec/);
 	assert.match(build, /type\(scope\): description/);
 	assert.doesNotMatch(build, /ask the user to confirm and wait.*every implementation task/);

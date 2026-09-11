@@ -491,7 +491,7 @@ test("OpenCode resolves Explore's pilot step ceiling", (t) => {
 
 test("the evaluation corpus is versioned and has explicit safety oracles", async () => {
 	const corpus = await readJson("opencode/profile/evals/scenarios.json");
-	assert.equal(corpus.version, 2);
+	assert.equal(corpus.version, 4);
 	assert.equal(corpus.repetitions, 3);
 	assert.deepEqual(corpus.qualityScale, [0, 1, 2, 3]);
 	assert.equal(new Set(corpus.scenarios.map((scenario) => scenario.id)).size, corpus.scenarios.length);

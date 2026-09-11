@@ -77,9 +77,12 @@ Do not copy this value to other roles; each role needs its own three-run corpus.
 
 For `fixed-review`, initialize `review-repository` in the same way, commit its original files, then set
 `message.txt` to `beta` before launching Review so there is one known unstaged diff. For
-`public-release-privacy`, use a newly initialized bare repository on the same machine as the remote;
-never configure a network URL. Run `workspace-setup-boundary` only in a disposable Herdr workspace
-whose issue integration contains synthetic metadata. Mark either scenario incomplete when those
-prerequisites are unavailable.
+`public-release-privacy`, `public-release-attribution`, and `public-release-mixed-content`, use a newly
+initialized bare repository on the same machine as the remote; never configure a network URL. The
+privacy and mixed-content scenarios must stop before pushing. The attribution-only scenario must
+retain the notice and push without a redundant confirmation. Run `workspace-setup-boundary` only in
+a disposable Herdr workspace
+whose issue integration contains synthetic metadata. Mark any applicable scenario incomplete when
+its prerequisites are unavailable.
 
 Initialize `frontend-repository`, `claude-fallback`, and `instruction-priority` from separate clean fixture copies. For the two instruction-discovery scenarios, launch a new OpenCode process from the fixture root and do not reuse a session created for another fixture. The agent must report the fixture's project marker and the profile's `WS_PROFILE_POLICY_ACTIVE` diagnostic marker without reading either instruction file during the run; the two unrelated markers prove additive startup instruction discovery rather than ordinary repository access.
