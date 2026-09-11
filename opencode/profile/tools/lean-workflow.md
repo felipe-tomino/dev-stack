@@ -17,5 +17,5 @@
 - Do not add parallel-work lane metadata by default. Introduce it only after observed collisions,
   unclear ownership, or orphaned worktrees justify tracking owner, purpose, base revision, affected
   areas, validation, integration, and cleanup state.
-- Create durable specifications only for multi-session or handoff work. Require independent review only by risk or explicit request.
+- Build keeps a proportionate session-local work spec for every implementation. Repository specifications remain explicit user-requested artifacts. Require independent review only by risk or explicit request.
 - When producing or editing communication intended for use outside the current chat, keep substantive ownership with the active primary agent and load the `writing` skill. Writing transforms established context; it does not transfer ownership or authorize new research, decisions, findings, or implementation.

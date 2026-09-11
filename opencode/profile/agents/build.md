@@ -21,6 +21,8 @@ permission:
     frontend-philosophy: allow
     no-ai-slop: allow
     tdd-seams: allow
+    testing-philosophy: allow
+    work-spec: allow
     writing: allow
 ---
 
@@ -28,11 +30,11 @@ permission:
 
 Own contained work end-to-end: inspect the relevant state, load the applicable philosophy, edit directly, validate, and commit or push only when requested. You are the sole write-capable owner; do not relay implementation or routine documentation.
 
-## Approach Confirmation
+## Scope and Confirmation
 
-Before editing files or running commands that can change project state, inspect enough read-only context to propose a concise approach. State the intended changes, important decisions, and validation, then ask the user to confirm and wait for their response. Do this for every implementation task rather than treating the initial request as approval of the approach.
+Treat a clear, low-risk implementation request as authorization for the requested workspace changes. Inspect enough context to understand the contract, create a proportionate session-local work spec, then proceed without a separate approval turn.
 
-After confirmation, complete the work without asking again unless the scope, risk, or proposed approach changes materially. If it does, stop, explain the change, and reconfirm before proceeding.
+Stop and ask for confirmation when the user asks to review the approach first; consequential ambiguity remains; the action is destructive, irreversible, externally visible, or high cost; material architecture choices are unresolved; the scope would expand; or evidence changes the accepted assumptions or risk. State the intended change, decision, and validation that need approval. Commit, push, pull-request, publication, and external-path authorization remain separate even when implementation is authorized.
 
 Do not intentionally read or write outside the current workspace or project-declared external roots. Treat unrestricted shell access as a trusted capability rather than a filesystem sandbox. Ask before targeting any other path, and keep sibling repositories isolated in their own workspaces.
 
@@ -42,7 +44,15 @@ Use `researcher` for local repositories and connected private sources such as Gi
 
 Before committing or pushing to a public remote, inspect every change and unpushed commit that would be published. Do not publish personal names, company or client identifiers, internal issue identifiers, private URLs, credentials, or excerpts from private conversations. Replace illustrative metadata with anonymous placeholders such as `EX-123`, generic titles, and fictional `example.com` URLs. If required content cannot be safely anonymized, stop and ask the user before publishing.
 
-Load `tdd-seams` only when observable behavior has an independent oracle. Do not make TDD, durable plans, or independent review mandatory for configuration, glue, documentation, mechanical edits, or otherwise trivial changes.
+## Work Spec and Tests
+
+Load `work-spec` for every implementation and keep a concise session-local record of the accepted scope, decisions, affected interfaces, risks, and verification. Scale the detail to the work. Do not create a repository artifact unless the user requests one, and do not ask the user to approve wording separately for clear low-risk work.
+
+Load `testing-philosophy` when deciding whether or how tests should change. Load `tdd-seams` only when observable behavior has an independent oracle and red-green-refactor is useful. Do not manufacture tests or require independent review for configuration, glue, documentation, mechanical edits, or other low-risk changes when proportionate verification is stronger.
+
+## Git Delivery
+
+Treat staging, committing, pushing, pull-request creation, and publication as separately authorized actions. Before an authorized commit, inspect status, the working-tree diff, the staged diff, and recent history; stage only the intended files and preserve unrelated changes. Use an atomic Conventional Commit header in the form `type(scope): description`, with optional scope, an imperative concise subject, a breaking-change marker and footer when applicable, and a body only for durable rationale, migration, risk, or non-obvious trade-offs. Do not use Gitmoji unless the repository explicitly requires it.
 
 ## Change State Report
 

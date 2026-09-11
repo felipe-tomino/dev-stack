@@ -95,13 +95,21 @@ The profile keeps one direct implementation owner and bounded read-only helpers:
 - **Web Researcher** uses public web sources and cannot read local or connected private sources.
 - **Review** and **Reviewer** evaluate a frozen local or remote baseline with exact read-only evidence tools.
 
+Build treats a clear low-risk request as authorization for the requested workspace edit. It asks before consequential ambiguity, destructive or irreversible work, external side effects, material architecture choices, or scope expansion. Commit, push, pull-request, and publication actions always require separate authorization. Every implementation keeps a proportionate session-local work spec; repository specification files are created only when explicitly requested.
+
+Repository-owned philosophy skills follow the nearest project contracts and patterns before proposing new abstractions or visual language. The separate **Testing Philosophy** skill guides whether and where tests add useful evidence; **TDD Seams** remains an optional workflow for observable behavior with an independent oracle.
+
 When any primary agent produces or edits communication intended for use outside the current chat, it loads the shared **Writing** skill. The active agent keeps ownership of the underlying facts, decisions, findings, or implementation while the skill shapes that established context into ready-to-use communication.
+
+OpenCode uses project `CLAUDE.md` as a compatibility fallback only when no applicable `AGENTS.md` exists. Profile instructions remain additive. When both project file types exist, `AGENTS.md` wins rather than merging with `CLAUDE.md`.
 
 Local repositories, authenticated GitHub data, Linear, and Slack form the private evidence zone. Web fetches, Exa, Context7, and grep.app form the public web zone. The split prevents the public-web specialist from reading private sources directly; parent agents must still avoid copying private material into public research prompts.
 
 ### Hunk review
 
 When OpenCode runs inside Herdr, use `<leader>shift+h` or `/hunk-review` to open the active working tree in a focused Hunk tab. The review includes staged, unstaged, and untracked changes. Use `/hunk-review-branch` to compare the current branch and working tree against the merge base of the repository's configured remote default branch. The branch command refuses to guess if zero or multiple remote defaults are configured.
+
+Use `/review` for a conventional read-only review of staged changes, the latest commit, a revision or range, a file, or a directory. It routes through the Review agent, freezes the target, applies risk-based Standards review, and keeps Acceptance findings separate when a named source of truth exists.
 
 For pair review, open the intended diff in Hunk and start a fresh **Review** session in the same worktree. Leave only one Hunk window open for that worktree: Review is restricted to the current repository and cannot enumerate or target sessions from sibling projects. Review can inspect the live session and discuss findings. Navigating the shared view or adding an agent comment requires confirmation; the independent **Reviewer** remains inspection-only. Source edits, destructive note operations, review reloads, and remote review submission remain unavailable to both roles.
 
@@ -117,7 +125,7 @@ Connected data is sent to the configured model provider when an agent reads it. 
 
 External local paths require permission by default, so one project does not receive access to sibling repositories or parent directories. A project can declare narrow exceptions in its own `.opencode/opencode.jsonc`; this repository allows its owned Herdr configuration, installed `ws` profile, TUI configuration, and TUI plugins. Read-only agents cannot edit files or run unrestricted shell commands. Build may edit the current project and project-specific external roots, but its unrestricted shell is a trusted capability rather than an OS-level filesystem sandbox. These are personal trust choices, not recommended defaults for an unfamiliar environment.
 
-Run `node --test opencode/profile/permissions.test.mjs` after changing profile or project permissions.
+Run `node --test opencode/profile/permissions.test.mjs opencode/profile/profile-contracts.test.mjs` after changing profile policy, components, or project permissions.
 Use `REQUIRE_OCX_RUNTIME=1` when runtime integration is required; missing OCX or OpenCode binaries then
 fail instead of skipping integration checks. The suite checks global and project external roots,
 read-only Git restrictions, delegation contracts, Build's trust boundary, retired primary agents,

@@ -1,0 +1,16 @@
+:root {
+	--action: #174ea6;
+	--action-text: #fff;
+}
+
+body {
+	font: 1rem/1.5 system-ui, sans-serif;
+	margin: 2rem;
+}
+
+.action {
+	background: var(--action);
+	border: 0;
+	color: var(--action-text);
+	padding: 0.5rem 1rem;
+}

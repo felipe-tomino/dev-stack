@@ -5,7 +5,6 @@
 	},
 	"renameWindow": true,
 	"exclude": [
-		"**/CLAUDE.md",
 		"**/CONTEXT.md"
 	]
 }

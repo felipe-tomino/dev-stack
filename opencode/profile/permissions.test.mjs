@@ -18,7 +18,9 @@ const externalRoots = {
 	"~/.config/yazi/keymap.toml": "allow",
 	"~/.config/yazi/package.toml": "allow",
 	"~/.config/yazi/yazi.toml": "allow",
+	"~/.config/opencode/profiles/ws": "allow",
 	"~/.config/opencode/profiles/ws/**": "allow",
+	"~/.config/opencode/tui-plugins": "allow",
 	"~/.config/opencode/tui-plugins/herdr-tui.js": "allow",
 	"~/.config/opencode/tui-plugins/hunk-review.js": "allow",
 	"~/.config/opencode/tui.jsonc": "allow",
@@ -416,15 +418,16 @@ test("Build is the only general write-capable agent", async () => {
 	}
 });
 
-test("work specs define one explicit finalized handoff transport", async () => {
+test("work specs separate accepted intent from draft decisions and explicit handoff transport", async () => {
 	const workSpec = await readFile(
 		path.join(profileDirectory, "skills/work-spec/SKILL.md"),
 		"utf8",
 	);
-	assert.match(workSpec, /only after the user accepts it as final/);
+	assert.match(workSpec, /User requests and explicit answers are accepted inputs/);
+	assert.match(workSpec, /unresolved agent proposals remain draft decisions/);
 	assert.match(workSpec, /include the finalized spec verbatim/);
 	assert.match(workSpec, /explicitly requests a repository artifact/);
-	assert.match(workSpec, /replacement explicitly/);
+	assert.match(workSpec, /Do not silently change accepted decisions/);
 });
 
 test("Web Researcher has no local read or private integration permissions", async () => {
@@ -488,7 +491,7 @@ test("OpenCode resolves Explore's pilot step ceiling", (t) => {
 
 test("the evaluation corpus is versioned and has explicit safety oracles", async () => {
 	const corpus = await readJson("opencode/profile/evals/scenarios.json");
-	assert.equal(corpus.version, 1);
+	assert.equal(corpus.version, 2);
 	assert.equal(corpus.repetitions, 3);
 	assert.deepEqual(corpus.qualityScale, [0, 1, 2, 3]);
 	assert.equal(new Set(corpus.scenarios.map((scenario) => scenario.id)).size, corpus.scenarios.length);

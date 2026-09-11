@@ -1,6 +1,6 @@
 ---
 name: work-spec
-description: Use ONLY for multi-session, multi-person, or independently sliced work that needs a compact durable handoff specification.
+description: Keep a proportionate session-local implementation contract with decisions, interfaces, risks, and verification.
 metadata:
   source: https://github.com/mattpocock/skills
   adaptation: Original compact adaptation inspired by Matt Pocock's AI Hero workflow
@@ -10,9 +10,9 @@ metadata:
 
 Source inspiration: https://github.com/mattpocock/skills
 
-Create a durable work spec only when work crosses sessions or people, needs handoff, or contains independently executable slices. Do not create one for contained work and do not build artifact graphs, lifecycle states, or an OpenSpec-style process.
+Create a concise session-local work spec for every implementation. Its job is to preserve accepted scope and decisions through execution and compaction, not to add ceremony. Scale detail with ambiguity, risk, duration, and the number of affected interfaces.
 
-Use exactly these sections:
+Use these sections when applicable. Write `None` with a short reason instead of manufacturing content.
 
 ## Goal
 One measurable outcome.
@@ -20,11 +20,20 @@ One measurable outcome.
 ## Non-goals
 Explicit exclusions.
 
+## Decisions and provenance
+Record consequential decisions and whether each came from the user, repository evidence, or named research. Do not invent citations. User requests and explicit answers are accepted inputs; unresolved agent proposals remain draft decisions.
+
+## Affected components and interfaces
+Name files, modules, schemas, commands, permissions, external systems, and compatibility boundaries that may change.
+
 ## Decided behavior / acceptance
 Observable behavior and acceptance evidence already decided.
 
 ## Constraints
 Technical, safety, compatibility, and ownership boundaries.
+
+## Migration, rollback, risks, and assumptions
+State operational consequences proportionately. Keep unresolved assumptions visible.
 
 ## Test seam
 The public seam and independent oracle, or `None` with the verification rationale.
@@ -35,13 +44,14 @@ Small end-to-end outcomes in dependency order; each slice should be independentl
 ## Verification
 Exact checks that establish completion.
 
-Keep unresolved decisions visible instead of disguising them as tasks. Return the spec in the conversation unless the user explicitly requests a file.
+## Current state
+Mark the active slice, completed evidence, blockers, and exact resume point.
+
+Keep unresolved decisions visible instead of disguising them as tasks. Store the spec through the profile's session-local persistence mechanism when available. Until that mechanism is available, keep it in the conversation and report that cross-session persistence is unavailable. Never create a repository file as an automatic fallback.
 
 ## Cross-session handoff
 
-A spec is a handoff only after the user accepts it as final. Keep drafts in conversation. A finalized
-handoff names its source identifier, owner, and the repository state or date against which it was
-accepted.
+A cross-session or cross-owner handoff names its source identifier, owner, and the repository state or date against which it was accepted. Do not ask the user to approve the persisted wording separately when a clear low-risk request already authorizes implementation. Ask when unresolved decisions meet the profile's risk-based confirmation threshold.
 
 Use one explicit transport:
 
@@ -49,6 +59,4 @@ Use one explicit transport:
 - when the user explicitly requests a repository artifact, place it at the repository's documented
   specification location.
 
-Do not summarize, merge, or silently refresh a finalized spec during transport. If issue metadata or
-repository state contradicts it, stop for a user decision. A replacement supersedes an earlier spec
-only when the user identifies and accepts the replacement explicitly.
+Do not silently change accepted decisions during transport or compaction. Update implementation state and repository evidence without rewriting the user's intent. If repository state contradicts an accepted consequential decision, stop for a user decision.

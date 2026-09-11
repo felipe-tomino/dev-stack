@@ -43,6 +43,7 @@
 	},
 	"instructions": [
 		"./tools/philosophy.md",
+		"./tools/communication.md",
 		"./tools/lean-workflow.md",
 		"./tools/herdr-worktrees.md",
 		"./tools/tool-execution.md"
