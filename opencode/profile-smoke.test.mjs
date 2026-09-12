@@ -161,18 +161,24 @@ test("runtime smoke fingerprints resolved OpenCode and OCX semantics", async (t)
 			assert.equal(profileDirectory, deterministicResult.targetProfileDirectory);
 			dependenciesInstalled = true;
 		},
-		listToolIDs: async () => [
-			"compress",
-			"github_source_commit",
-			"github_source_file",
-			"github_source_tree",
-			"herdr_worktree_create",
-			"herdr_worktree_list",
-			"herdr_worktree_open",
-			"herdr_worktree_remove",
-			"work_spec_read",
-			"work_spec_write",
-		],
+		readCatalog: async () => ({
+			toolIDs: [
+				"compress",
+				"github_source_commit",
+				"github_source_file",
+				"github_source_tree",
+				"herdr_worktree_create",
+				"herdr_worktree_list",
+				"herdr_worktree_open",
+				"herdr_worktree_remove",
+				"work_spec_read",
+				"work_spec_write",
+			],
+			skills: deterministicResult.skills.map((name) => ({
+				name,
+				location: `${deterministicResult.targetProfileDirectory}/skills/${name}/SKILL.md`,
+			})),
+		}),
 	});
 
 	assert.equal(result.tier, "runtime");
@@ -198,5 +204,5 @@ test("runtime smoke fingerprints resolved OpenCode and OCX semantics", async (t)
 	assert.equal(result.openCode.webResearcherIsLocallyIsolated, true);
 	assert.equal(result.ocx.profileName, "ws");
 	assert.equal(result.ocx.policyMatched, true);
-	assert.equal(calls.length, 11);
+	assert.equal(calls.length, 10);
 });

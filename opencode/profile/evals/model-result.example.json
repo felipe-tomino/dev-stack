@@ -1,6 +1,6 @@
 {
 	"status": "incomplete",
-	"studyVersion": 2,
+	"studyVersion": 3,
 	"laneId": "contained-implementation",
 	"candidateRole": "build",
 	"topology": "direct-owner",

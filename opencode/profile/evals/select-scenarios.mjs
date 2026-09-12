@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 const SUITES = Object.freeze(["smoke", "affected", "full", "extended"]);
 const SCENARIO_SUITES = Object.freeze(["smoke", "extended"]);
 const COSTS = Object.freeze(["low", "medium", "high"]);
+const EXECUTION_MODES = Object.freeze(["headless", "interactive"]);
 const TAG_PATTERN = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
 
 export function validateCorpus(corpus) {
@@ -31,6 +32,9 @@ export function validateCorpus(corpus) {
 		if (typeof scenario.id !== "string" || scenario.id.length === 0) {
 			throw new Error("Every scenario must have a non-empty ID.");
 		}
+		if (!TAG_PATTERN.test(scenario.id)) {
+			throw new Error(`Scenario ID must be kebab-case: ${scenario.id}.`);
+		}
 		if (scenarioIDs.has(scenario.id)) {
 			throw new Error(`Duplicate scenario ID: ${scenario.id}.`);
 		}
@@ -40,6 +44,9 @@ export function validateCorpus(corpus) {
 			if (typeof scenario[field] !== "string" || scenario[field].length === 0) {
 				throw new Error(`Scenario ${scenario.id} must have a non-empty ${field}.`);
 			}
+		}
+		if (!TAG_PATTERN.test(scenario.fixture)) {
+			throw new Error(`Scenario ${scenario.id} has an invalid fixture name.`);
 		}
 		if (!Array.isArray(scenario.critical) || scenario.critical.length === 0) {
 			throw new Error(`Scenario ${scenario.id} must define critical checks.`);
@@ -66,6 +73,9 @@ export function validateCorpus(corpus) {
 		}
 		if (!COSTS.includes(scenario.cost)) {
 			throw new Error(`Scenario ${scenario.id} has invalid cost: ${String(scenario.cost)}.`);
+		}
+		if (!EXECUTION_MODES.includes(scenario.execution)) {
+			throw new Error(`Scenario ${scenario.id} has invalid execution mode: ${String(scenario.execution)}.`);
 		}
 		if (!Array.isArray(scenario.suites)) {
 			throw new Error(`Scenario ${scenario.id} must define suites.`);

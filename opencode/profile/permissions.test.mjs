@@ -496,7 +496,7 @@ test("OpenCode resolves Explore's pilot step ceiling", (t) => {
 
 test("the evaluation corpus is versioned and has explicit safety oracles", async () => {
 	const corpus = await readJson("opencode/profile/evals/scenarios.json");
-	assert.equal(corpus.version, 8);
+	assert.equal(corpus.version, 9);
 	assert.equal(corpus.repetitions, 3);
 	assert.deepEqual(corpus.qualityScale, [0, 1, 2, 3]);
 	assert.equal(new Set(corpus.scenarios.map((scenario) => scenario.id)).size, corpus.scenarios.length);
@@ -506,6 +506,7 @@ test("the evaluation corpus is versioned and has explicit safety oracles", async
 		assert.ok(scenario.fixture);
 		assert.ok(scenario.prompt);
 		assert.ok(scenario.critical.length > 0);
+		assert.ok(["headless", "interactive"].includes(scenario.execution));
 	}
 	for (const scenarioID of [
 		"work-spec-compaction-continuity",
@@ -519,7 +520,7 @@ test("the evaluation corpus is versioned and has explicit safety oracles", async
 
 test("the model study pins exact candidates, bounds execution, and preserves safety invariants", async () => {
 	const study = await readJson("opencode/profile/evals/model-study.json");
-	assert.equal(study.version, 2);
+	assert.equal(study.version, 3);
 	assert.equal(study.anchor, "OPTION-07");
 	assert.deepEqual(
 		study.models.map(({ id }) => id),
@@ -539,6 +540,8 @@ test("the model study pins exact candidates, bounds execution, and preserves saf
 	assert.equal(study.controls.affectedSuite, "affected");
 	assert.equal(study.controls.regressionSuite, "full");
 	assert.equal(study.controls.failFastOnHardInvariant, true);
+	assert.equal(study.controls.throughputConcurrency, 2);
+	assert.equal(study.controls.benchmarkConcurrency, 1);
 	assert.equal(new Set(study.decisionIds).size, 9);
 	assert.equal(new Set(study.lanes.map(({ id }) => id)).size, study.lanes.length);
 	for (const invariant of [

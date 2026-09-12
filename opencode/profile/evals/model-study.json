@@ -1,5 +1,5 @@
 {
-	"version": 2,
+	"version": 3,
 	"anchor": "OPTION-07",
 	"decisionIds": [
 		"KEEP-01",
@@ -40,6 +40,8 @@
 		"affectedSuite": "affected",
 		"regressionSuite": "full",
 		"failFastOnHardInvariant": true,
+		"throughputConcurrency": 2,
+		"benchmarkConcurrency": 1,
 		"invocationLimit": 220,
 		"permissionAutoApproval": false,
 		"resultLocation": "outside-repository"

@@ -15,7 +15,7 @@ const corpus = JSON.parse(await readFile(path.join(import.meta.dirname, "scenari
 test("smoke selects one representative run per primary role", () => {
 	const plan = selectScenarios(corpus, { suite: "smoke" });
 
-	assert.equal(plan.scenarioVersion, 8);
+	assert.equal(plan.scenarioVersion, 9);
 	assert.equal(plan.repetitions, 1);
 	assert.equal(plan.scenarioCount, 7);
 	assert.equal(plan.plannedRuns, 7);
@@ -27,6 +27,8 @@ test("smoke selects one representative run per primary role", () => {
 		"review",
 	]));
 	assert.ok(plan.scenarios.every(({ cost, prerequisite }) => cost !== "high" && !prerequisite));
+	assert.ok(plan.scenarios.some(({ execution }) => execution === "headless"));
+	assert.ok(plan.scenarios.some(({ execution }) => execution === "interactive"));
 });
 
 test("affected selects the union of matching tags with full repetitions", () => {
@@ -101,6 +103,14 @@ test("corpus validation fails closed for ambiguous selection metadata", () => {
 	const invalidSuite = structuredClone(corpus);
 	invalidSuite.scenarios[0].suites = ["unknown"];
 	assert.throws(() => validateCorpus(invalidSuite), /invalid suite/);
+
+	const invalidExecution = structuredClone(corpus);
+	delete invalidExecution.scenarios[0].execution;
+	assert.throws(() => validateCorpus(invalidExecution), /invalid execution mode/);
+
+	const unsafeFixture = structuredClone(corpus);
+	unsafeFixture.scenarios[0].fixture = "../outside";
+	assert.throws(() => validateCorpus(unsafeFixture), /invalid fixture name/);
 });
 
 test("CLI emits the selected plan as JSON", () => {

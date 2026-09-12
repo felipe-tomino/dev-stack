@@ -281,14 +281,35 @@ function parseToolIDs(value) {
 	return value;
 }
 
-export async function listPublishedToolIDs({ launcher, executionOptions, directory, spawnProcess = spawn }) {
+function parseSkills(value) {
+	if (
+		!Array.isArray(value) ||
+		value.some((skill) => (
+			!skill ||
+			typeof skill !== "object" ||
+			typeof skill.name !== "string" ||
+			typeof skill.location !== "string"
+		))
+	) {
+		throw new Error("OpenCode returned an invalid skill catalog.");
+	}
+	return value;
+}
+
+export async function readRuntimeCatalog({ launcher, executionOptions, directory, spawnProcess = spawn }) {
 	const port = await availablePort();
+	const serverUsername = "profile-smoke";
+	const serverPassword = `profile-smoke-${process.pid}-${port}`;
 	const child = spawnProcess(
 		launcher,
 		["serve", "--hostname", "127.0.0.1", "--port", String(port)],
 		{
 			cwd: executionOptions.cwd,
-			env: executionOptions.env,
+			env: {
+				...executionOptions.env,
+				OPENCODE_SERVER_USERNAME: serverUsername,
+				OPENCODE_SERVER_PASSWORD: serverPassword,
+			},
 			stdio: ["ignore", "pipe", "pipe"],
 		},
 	);
@@ -299,6 +320,11 @@ export async function listPublishedToolIDs({ launcher, executionOptions, directo
 	child.stderr?.on("data", (chunk) => { diagnostics += chunk.toString(); });
 	const endpoint = new URL("/experimental/tool/ids", `http://127.0.0.1:${port}`);
 	endpoint.searchParams.set("directory", directory);
+	const skillEndpoint = new URL("/skill", endpoint);
+	skillEndpoint.searchParams.set("directory", directory);
+	const headers = {
+		Authorization: `Basic ${Buffer.from(`${serverUsername}:${serverPassword}`).toString("base64")}`,
+	};
 	const deadline = Date.now() + 20_000;
 
 	try {
@@ -308,13 +334,16 @@ export async function listPublishedToolIDs({ launcher, executionOptions, directo
 				throw new Error("OpenCode exited before publishing its tools.");
 			}
 			try {
-				const response = await fetch(endpoint);
+				const response = await fetch(endpoint, { headers });
 				if (!response.ok) throw new Error(`HTTP ${response.status}`);
 				const toolIDs = parseToolIDs(await response.json());
+				const skillResponse = await fetch(skillEndpoint, { headers });
+				if (!skillResponse.ok) throw new Error(`Skill catalog HTTP ${skillResponse.status}`);
+				const skills = parseSkills(await skillResponse.json());
 				if (/failed to load plugin/iu.test(diagnostics)) {
 					throw new Error("OpenCode reported a plugin load failure.");
 				}
-				return toolIDs;
+				return { toolIDs, skills };
 			} catch (error) {
 				if (Date.now() >= deadline) throw error;
 				await delay(100);
@@ -334,7 +363,7 @@ export async function runRuntimeSmoke({
 	repositoryRoot,
 	execute = executeFile,
 	installDependencies = installProfileDependencies,
-	listToolIDs = listPublishedToolIDs,
+	readCatalog = readRuntimeCatalog,
 	opencodeExecutable = "opencode",
 	ocxExecutable = "ocx",
 }) {
@@ -354,7 +383,6 @@ export async function runRuntimeSmoke({
 		...EXPECTED_AGENTS.map((agentName) => (
 			execute(launcher, ["debug", "agent", agentName], executionOptions)
 		)),
-		execute(launcher, ["debug", "skill"], executionOptions),
 		execute(ocxExecutable, ["config", "show", "--profile", "ws", "--json"], {
 			cwd: repositoryRoot,
 			maxBuffer: 20 * 1024 * 1024,
@@ -362,7 +390,6 @@ export async function runRuntimeSmoke({
 	]);
 	const configOutput = outputs[0];
 	const agentOutputs = outputs.slice(1, 1 + EXPECTED_AGENTS.length);
-	const skillOutput = outputs.at(-2);
 	const ocxOutput = outputs.at(-1);
 
 	const config = parseCommandJson("opencode debug config", configOutput.stdout);
@@ -372,9 +399,8 @@ export async function runRuntimeSmoke({
 	]));
 	const buildAgent = resolvedAgents.build;
 	const reviewAgent = resolvedAgents.review;
-	const skills = parseCommandJson("opencode debug skill", skillOutput.stdout);
 	const ocxConfig = parseCommandJson("ocx config show", ocxOutput.stdout);
-	const toolIDs = await listToolIDs({
+	const { toolIDs, skills } = await readCatalog({
 		launcher,
 		executionOptions,
 		directory: repositoryRoot,

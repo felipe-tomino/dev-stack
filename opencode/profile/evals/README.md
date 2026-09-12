@@ -36,6 +36,49 @@ policy or component; do not omit an affected safety boundary merely to save call
 runs but does not execute or score them. If any critical check or model-study hard invariant fails,
 stop that candidate's remaining repetitions: it can no longer satisfy the all-repetitions pass rule.
 
+## Parallel campaign runner
+
+The campaign runner prepares a fresh Git fixture for every repetition, runs scenarios marked
+`headless`, captures their JSON event streams and result records, and queues scenarios marked
+`interactive` with exact launch data. It runs runtime smoke and captures the resolved OCX configuration
+once before starting workers instead of repeating environment discovery for every run. Result roots
+must be outside this repository.
+
+Inspect a campaign without creating fixtures or calling a provider:
+
+```bash
+node opencode/profile/evals/run-scenarios.mjs --suite full --dry-run
+```
+
+Run the full regression campaign with two isolated headless runs at a time:
+
+```bash
+EVAL_OUTPUT="$(mktemp -d)"
+node opencode/profile/evals/run-scenarios.mjs \
+  --suite full \
+  --output "$EVAL_OUTPUT" \
+  --concurrency 2
+```
+
+The default concurrency is 2 and the maximum is 4. Parallel campaigns reduce wall-clock time but
+their latency values are not comparable because provider contention, caching, and throttling affect
+individual runs. Use serial benchmark mode for model or latency comparisons:
+
+```bash
+node opencode/profile/evals/run-scenarios.mjs \
+  --suite smoke \
+  --output "$EVAL_OUTPUT" \
+  --benchmark
+```
+
+The runner never passes `--auto`. Confirmation, DCP and compaction, Herdr, and publication scenarios
+remain interactive so their prompts and permission decisions stay observable. For each queued run,
+open its `launch.json`, enter the recorded fixture directory, start `OCX_PROFILE=ws ocx oc`, and submit
+the recorded prompt. Each run directory contains `result.json` and `launch.json`; completed headless
+runs also contain `events.ndjson` and `stderr.log`. The campaign root contains `environment.json` with
+the shared runtime evidence. Fill the incomplete scoring fields, including the DCP panel mode where
+applicable, after reviewing the trace and fixture state.
+
 ## Model and agent-architecture study
 
 The study uses the exact OpenCode model IDs in `model-study.json`; do not infer model identity from a
@@ -49,7 +92,8 @@ availability, subscription limits, throttling, or unequal service treatment woul
 misleading. The first cross-model pass uses medium reasoning effort. Only viable finalists are repeated
 with the role's intended production effort. Randomize model order, distinguish cold and warm cache
 conditions, reset fixtures, and keep individual requests below the provider's long-context pricing
-threshold except in the explicit context-pressure lane.
+threshold except in the explicit context-pressure lane. Use `--benchmark` for every latency or
+cross-model comparison; parallel output is throughput evidence only.
 
 Run the lanes in this order:
 
@@ -97,7 +141,8 @@ git -C "$EVAL_ROOT" -c user.name='Harness Eval' -c user.email='eval@example.com'
 
 Then follow this protocol:
 
-1. Start each run from a fresh fixture copy outside this repository.
+1. Start each run from a fresh fixture copy outside this repository. Prefer the campaign runner for
+   fixture setup and headless runs.
 2. Record the repository and profile commit, `ocx --version`, `opencode --version`, provider/model
    options, scenario version, fixture Git state, runtime smoke result, DCP version from runtime smoke,
    DCP mode from the `/dcp` panel, and the

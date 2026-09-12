@@ -5,6 +5,8 @@ import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
+import { readRuntimeCatalog } from "../profile-smoke.mjs";
+
 const profileDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(profileDirectory, "../..");
 const workcellRevision = "77e6c5fef1941d113b21f63f4c4f7d74d2e086b5";
@@ -22,7 +24,7 @@ function hasRuntimeCommand(command) {
 	return !spawnSync(command, ["--version"], { encoding: "utf8" }).error;
 }
 
-function runOpenCodeDebug(args) {
+function openCodeEnvironment() {
 	const environment = {
 		...process.env,
 		OPENCODE_CONFIG_DIR: profileDirectory,
@@ -31,11 +33,14 @@ function runOpenCodeDebug(args) {
 	};
 	delete environment.OCX_CONTEXT;
 	delete environment.OPENCODE_CONFIG_CONTENT;
+	return environment;
+}
 
+function runOpenCodeDebug(args) {
 	const result = spawnSync("opencode", ["debug", ...args], {
 		cwd: repositoryRoot,
 		encoding: "utf8",
-		env: environment,
+		env: openCodeEnvironment(),
 		maxBuffer: 16 * 1024 * 1024,
 	});
 	assert.equal(result.status, 0, result.stderr || `opencode debug ${args.join(" ")} failed`);
@@ -203,7 +208,7 @@ test("profile-wide communication and CLAUDE fallback are composed", async () => 
 	assert.match(communication, /Do not invent time estimates or force a fixed number of options/);
 });
 
-test("OpenCode resolves the local foundation components", (t) => {
+test("OpenCode resolves the local foundation components", async (t) => {
 	if (!hasRuntimeCommand("opencode")) {
 		if (requireRuntime) assert.fail("opencode is required when REQUIRE_OCX_RUNTIME=1");
 		t.skip("opencode is not installed");
@@ -218,7 +223,14 @@ test("OpenCode resolves the local foundation components", (t) => {
 		"OpenCode must discover the session work-spec plugin",
 	);
 
-	const skills = runOpenCodeDebug(["skill"]);
+	const { skills } = await readRuntimeCatalog({
+		launcher: "opencode",
+		executionOptions: {
+			cwd: repositoryRoot,
+			env: openCodeEnvironment(),
+		},
+		directory: repositoryRoot,
+	});
 	for (const skillName of ["code-philosophy", "frontend-philosophy", "code-review", "testing-philosophy"]) {
 		const skill = skills.find(({ name }) => name === skillName);
 		assert.ok(skill, `${skillName} must resolve`);
