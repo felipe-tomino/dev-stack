@@ -35,14 +35,14 @@ export default async function SessionWorkSpec({ client, project, worktree }) {
 	return {
 		tool: {
 			work_spec_read: tool({
-				description: "Read the work spec shared by the current root session and its children.",
+				description: "Call this OpenCode tool directly to read the work spec shared by the current root session and its children. This is not a shell command.",
 				args: {},
 				async execute(_args, context) {
 					return handlers.read(context);
 				},
 			}),
 			work_spec_write: tool({
-				description: "Replace the work spec shared by the current root session and its children.",
+				description: "Call this OpenCode tool directly before editing to replace the work spec shared by the current root session and its children. This is not a shell command; do not probe for it or substitute a file.",
 				args: {
 					content: tool.schema
 						.string()

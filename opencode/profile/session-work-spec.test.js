@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
+import SessionWorkSpec from "./plugins/session-work-spec.js";
 import {
 	createSessionWorkSpecToolHandlers,
 	createSessionWorkSpecRuntime,
@@ -11,6 +12,18 @@ import {
 	MAX_WORK_SPEC_BYTES,
 	resolveRootSession,
 } from "./plugins/session-work-spec/core.js";
+
+test("work-spec tools identify themselves as direct OpenCode tools", async () => {
+	const plugin = await SessionWorkSpec({
+		client: {},
+		project: { id: "project-1" },
+		worktree: "/repo",
+	});
+
+	assert.match(plugin.tool.work_spec_write.description, /Call this OpenCode tool directly/);
+	assert.match(plugin.tool.work_spec_write.description, /not a shell command/);
+	assert.match(plugin.tool.work_spec_read.description, /Call this OpenCode tool directly/);
+});
 
 async function createFixture(t) {
 	const stateDirectory = await mkdtemp(path.join(os.tmpdir(), "session-work-spec-"));
