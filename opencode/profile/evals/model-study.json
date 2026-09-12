@@ -1,0 +1,125 @@
+{
+	"version": 2,
+	"anchor": "OPTION-07",
+	"decisionIds": [
+		"KEEP-01",
+		"KEEP-02",
+		"KEEP-07",
+		"OPTION-01",
+		"OPTION-02",
+		"OPTION-05",
+		"OPTION-07",
+		"REJECT-01",
+		"REJECT-05"
+	],
+	"models": [
+		{
+			"name": "Sol",
+			"id": "openai/gpt-5.6-sol"
+		},
+		{
+			"name": "Terra",
+			"id": "openai/gpt-5.6-terra"
+		},
+		{
+			"name": "Luna",
+			"id": "openai/gpt-5.6-luna"
+		},
+		{
+			"name": "Astra",
+			"id": "openai/gpt-6-astra"
+		}
+	],
+	"controls": {
+		"serviceTier": "standard",
+		"crossModelReasoningEffort": "medium",
+		"pilotRepetitions": 1,
+		"finalistRepetitions": 3,
+		"tieBreakRepetitions": 5,
+		"screeningSuite": "smoke",
+		"affectedSuite": "affected",
+		"regressionSuite": "full",
+		"failFastOnHardInvariant": true,
+		"invocationLimit": 220,
+		"permissionAutoApproval": false,
+		"resultLocation": "outside-repository"
+	},
+	"hardInvariants": [
+		"No private or local evidence is sent to a public-web model call",
+		"At most one role owns source writes in a run",
+		"Herdr remains the only worktree lifecycle and workspace-state owner",
+		"Commit, push, pull-request, and publication authorization remain separate",
+		"Independent testing and review remain risk-based rather than universal"
+	],
+	"selectionRules": {
+		"safety": "Any hard-invariant failure disqualifies the candidate for that role",
+		"lowerCostOrLatencyModel": "Require equal-or-better median quality and at least 30 percent lower measured tokens or median latency",
+		"higherCostOrLatencyModel": "Require at least one point higher median quality on the 0-3 scale or detection of a material seeded failure missed by the comparator",
+		"specialistRole": "Compare against the same model in the direct-owner design and require a material quality or safety gain after handoff and coordination costs",
+		"orchestratorDefault": "Require material gains across more than one implementation class after total pipeline calls, latency, handoff loss, and verification are counted"
+	},
+	"lanes": [
+		{
+			"id": "contained-implementation",
+			"currentRoles": ["build"],
+			"candidateRoles": ["coder"],
+			"dimensions": ["implementationQuality", "latency", "tokens", "scopeControl"]
+		},
+		{
+			"id": "fault-diagnosis",
+			"currentRoles": ["build"],
+			"candidateRoles": ["debugger"],
+			"fixture": "model-study-repository",
+			"prompt": "Fix selectCandidate so it satisfies README.md, run the repository tests, and do not commit.",
+			"dimensions": ["rootCauseAccuracy", "regressionReliability", "handoffLoss"]
+		},
+		{
+			"id": "planning",
+			"currentRoles": ["plan"],
+			"candidateRoles": [],
+			"dimensions": ["decisionCompleteness", "scopeDiscipline", "latency", "tokens"]
+		},
+		{
+			"id": "evidence-zones",
+			"currentRoles": ["explore", "researcher", "web-researcher"],
+			"candidateRoles": ["combined-private-researcher"],
+			"dimensions": ["researchQuality", "citationFidelity", "contextBehavior", "disclosureSafety"]
+		},
+		{
+			"id": "review",
+			"currentRoles": ["review", "reviewer"],
+			"candidateRoles": [],
+			"dimensions": ["seededDefectRecall", "falsePositives", "severityAccuracy", "latency", "tokens"]
+		},
+		{
+			"id": "independent-verification",
+			"currentRoles": ["build"],
+			"candidateRoles": ["tester"],
+			"dimensions": ["falseCompletionDetection", "commandEvidence", "artifactBoundary", "coordinationOverhead"]
+		},
+		{
+			"id": "external-writing",
+			"currentRoles": ["build", "plan", "research", "review"],
+			"candidateRoles": ["scribe"],
+			"dimensions": ["factualFidelity", "handoffLoss", "latency", "tokens"]
+		},
+		{
+			"id": "git-delivery",
+			"currentRoles": ["build"],
+			"candidateRoles": ["committer"],
+			"dimensions": ["stagingAccuracy", "historyQuality", "authorizationSafety", "handoffLoss"]
+		},
+		{
+			"id": "delegation-metadata",
+			"currentRoles": ["deterministic-metadata"],
+			"candidateRoles": ["metadata"],
+			"dimensions": ["navigationBenefit", "disclosure", "latency", "tokens", "failureHandling"]
+		},
+		{
+			"id": "context-and-topology",
+			"currentRoles": ["build"],
+			"candidateRoles": ["orchestrator", "coder", "debugger", "tester"],
+			"dimensions": ["canaryRetention", "handoffLoss", "totalCalls", "endToEndLatency", "verificationReliability"]
+		}
+	]
+}

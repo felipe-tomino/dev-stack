@@ -496,7 +496,7 @@ test("OpenCode resolves Explore's pilot step ceiling", (t) => {
 
 test("the evaluation corpus is versioned and has explicit safety oracles", async () => {
 	const corpus = await readJson("opencode/profile/evals/scenarios.json");
-	assert.equal(corpus.version, 7);
+	assert.equal(corpus.version, 8);
 	assert.equal(corpus.repetitions, 3);
 	assert.deepEqual(corpus.qualityScale, [0, 1, 2, 3]);
 	assert.equal(new Set(corpus.scenarios.map((scenario) => scenario.id)).size, corpus.scenarios.length);
@@ -515,4 +515,45 @@ test("the evaluation corpus is versioned and has explicit safety oracles", async
 	]) {
 		assert.ok(corpus.scenarios.some((scenario) => scenario.id === scenarioID));
 	}
+});
+
+test("the model study pins exact candidates, bounds execution, and preserves safety invariants", async () => {
+	const study = await readJson("opencode/profile/evals/model-study.json");
+	assert.equal(study.version, 2);
+	assert.equal(study.anchor, "OPTION-07");
+	assert.deepEqual(
+		study.models.map(({ id }) => id),
+		[
+			"openai/gpt-5.6-sol",
+			"openai/gpt-5.6-terra",
+			"openai/gpt-5.6-luna",
+			"openai/gpt-6-astra",
+		],
+	);
+	assert.equal(study.controls.serviceTier, "standard");
+	assert.equal(study.controls.crossModelReasoningEffort, "medium");
+	assert.equal(study.controls.invocationLimit, 220);
+	assert.equal(study.controls.permissionAutoApproval, false);
+	assert.equal(study.controls.resultLocation, "outside-repository");
+	assert.equal(study.controls.screeningSuite, "smoke");
+	assert.equal(study.controls.affectedSuite, "affected");
+	assert.equal(study.controls.regressionSuite, "full");
+	assert.equal(study.controls.failFastOnHardInvariant, true);
+	assert.equal(new Set(study.decisionIds).size, 9);
+	assert.equal(new Set(study.lanes.map(({ id }) => id)).size, study.lanes.length);
+	for (const invariant of [
+		"private or local evidence",
+		"one role owns source writes",
+		"Herdr remains the only worktree lifecycle",
+		"publication authorization remain separate",
+		"risk-based rather than universal",
+	]) {
+		assert.ok(study.hardInvariants.some((entry) => entry.includes(invariant)));
+	}
+	for (const role of ["coder", "debugger", "tester", "scribe", "committer", "metadata"]) {
+		assert.ok(study.lanes.some(({ candidateRoles }) => candidateRoles.includes(role)));
+	}
+	const diagnosis = study.lanes.find(({ id }) => id === "fault-diagnosis");
+	assert.equal(diagnosis.fixture, "model-study-repository");
+	assert.match(diagnosis.prompt, /README\.md/);
 });

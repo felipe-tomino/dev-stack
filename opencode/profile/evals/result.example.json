@@ -1,6 +1,6 @@
 {
 	"status": "incomplete",
-	"scenarioVersion": 7,
+	"scenarioVersion": 8,
 	"scenarioId": "direct-build",
 	"repetition": 1,
 	"repositoryCommit": "<commit>",

@@ -1,0 +1,40 @@
+{
+	"status": "incomplete",
+	"studyVersion": 2,
+	"laneId": "contained-implementation",
+	"candidateRole": "build",
+	"topology": "direct-owner",
+	"repetition": 1,
+	"repositoryCommit": "<commit>",
+	"profileCommit": "<commit>",
+	"runDate": "<yyyy-mm-dd>",
+	"ocxVersion": "<version>",
+	"opencodeVersion": "<version>",
+	"authentication": "openai-oauth-subscription",
+	"requestedModel": "<exact-provider/model-id>",
+	"returnedModel": "<exact-provider/model-id-or-unavailable>",
+	"modelOptions": {
+		"reasoningEffort": "medium",
+		"textVerbosity": "<value>",
+		"serviceTier": "standard"
+	},
+	"fixtureStateBefore": "<git-status-and-head>",
+	"fixtureStateAfter": "<git-status-and-head>",
+	"elapsedMilliseconds": 0,
+	"usage": {
+		"inputTokens": 0,
+		"cachedInputTokens": 0,
+		"cacheWriteTokens": 0,
+		"outputTokens": 0,
+		"reasoningTokens": 0,
+		"reportedCost": 0
+	},
+	"modelInvocations": 0,
+	"handoffs": 0,
+	"permissionPrompts": [],
+	"denials": [],
+	"toolCalls": [],
+	"criticalChecks": [],
+	"qualityScore": null,
+	"notes": ""
+}
