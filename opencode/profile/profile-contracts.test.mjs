@@ -125,13 +125,18 @@ test("session work-spec tools preserve one writer and the private evidence bound
 
 	const build = await readProfileFile("agents/build.md");
 	assert.match(build, /^  work_spec_write: allow$/m);
-	assert.match(build, /do not make the first edit until `work_spec_write` succeeds/);
+	assert.match(build, /do not make the first edit until the direct `work_spec_write` call succeeds/);
+	assert.match(build, /model-facing OpenCode tool/);
+	assert.match(build, /Never look for it with Bash/);
 	for (const agentName of ["plan", "research", "review", "explore", "researcher", "reviewer", "web-researcher"]) {
 		const agent = await readProfileFile(`agents/${agentName}.md`);
 		assert.doesNotMatch(agent, /^  work_spec_write: allow$/m, `${agentName} must not write work specs`);
 	}
 	const webResearcher = await readProfileFile("agents/web-researcher.md");
 	assert.doesNotMatch(webResearcher, /^  work_spec_read: allow$/m);
+	const workSpec = await readProfileFile("skills/work-spec/SKILL.md");
+	assert.match(workSpec, /Call these model-facing OpenCode tools directly/);
+	assert.match(workSpec, /Never probe for them with Bash/);
 });
 
 test("typed GitHub source reads require immutable commits and stay private", async () => {
