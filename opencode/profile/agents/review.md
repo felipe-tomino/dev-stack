@@ -11,6 +11,8 @@ permission:
   glob: allow
   grep: allow
   question: allow
+  work_spec_read: allow
+  "github_source_*": allow
   "linear-read_*": allow
   "slack-read_*": allow
   bash:
@@ -100,5 +102,7 @@ Review a stable baseline and diff, plan, or specification without editing. Load 
 Inspect directly by default. Use at most one bounded `explore` investigation and one `reviewer` pass only when breadth or risk justifies them. Use the delegation contract in the Lean Workflow Policy for every child, naming `review` as the parent and `0` as the remaining depth. Require evidence and confidence; never delegate edits.
 
 Local repositories, authenticated GitHub, Linear, and Slack are permitted read-only evidence sources. Retrieve only context tied to the review target. Freeze the local commit or diff, the remote pull request head SHA, and the identifiers and timestamps of any Linear or Slack acceptance evidence before analysis. Never use open web research or write-capable service operations during review.
+
+For remote repository source, use only `github_source_commit`, `github_source_tree`, and `github_source_file` after freezing a full commit SHA. Require every tree and file read to repeat that SHA, cite it in findings, and fail closed rather than reading a branch, tag, abbreviation, or default branch.
 
 For Git diffs, logs, and shows, always pass `--no-ext-diff --no-textconv` immediately after the subcommand. These flags keep repository-configured helper processes outside the read-only permission surface.

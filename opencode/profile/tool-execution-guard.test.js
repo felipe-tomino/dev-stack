@@ -9,8 +9,8 @@ import { promisify } from "node:util";
 import {
 	APPROVED_DIRECTORY_ALIASES,
 	createToolExecutionGuard,
-	default as ToolExecutionGuard,
-} from "./plugins/tool-execution-guard.js";
+} from "./plugins/tool-execution-guard/core.js";
+import ToolExecutionGuard from "./plugins/tool-execution-guard.js";
 
 const executeFile = promisify(execFile);
 
@@ -49,17 +49,28 @@ async function structuredRejection(operation) {
 test("publishes a strict Bash schema with approved directory aliases", async (t) => {
 	const { workspaceRoot, tempRoot } = await createFixture(t);
 	const hooks = createToolExecutionGuard({ workspaceRoot, tempRoot });
-	const definition = {};
+	const command = { name: "command" };
+	const timeout = { name: "timeout" };
+	const workdir = {
+		name: "workdir",
+		annotate(annotation) { return { name: "directory", annotation }; },
+	};
+	const definition = {
+		parameters: {
+			fields: { command, timeout, workdir },
+			mapFields(mapper) { return { fields: mapper(this.fields) }; },
+		},
+	};
 
 	await hooks["tool.definition"]({ toolID: "bash" }, definition);
 
-	assert.equal(definition.parameters.additionalProperties, false);
-	assert.deepEqual(definition.parameters.required, ["command"]);
-	assert.deepEqual(
-		definition.parameters.properties.directory.enum,
-		APPROVED_DIRECTORY_ALIASES,
-	);
-	assert.equal(definition.parameters.properties.workdir, undefined);
+	assert.deepEqual(Object.keys(definition.parameters.fields), ["command", "directory", "timeout"]);
+	assert.equal(definition.parameters.fields.command, command);
+	assert.equal(definition.parameters.fields.timeout, timeout);
+	assert.deepEqual(definition.parameters.fields.directory, {
+		name: "directory",
+		annotation: { description: "Approved directory alias. Omit to use the workspace root." },
+	});
 });
 
 test("resolves every approved directory alias to its canonical directory", async (t) => {
@@ -282,7 +293,16 @@ test("the default plugin uses OpenCode hook inputs and redacted application logs
 		worktree: workspaceRoot,
 		client: { app: { log: async (entry) => logs.push(entry) } },
 	});
-	const definition = {};
+	const definition = {
+		parameters: {
+			fields: {
+				command: { name: "command" },
+				timeout: { name: "timeout" },
+				workdir: { name: "workdir" },
+			},
+			mapFields(mapper) { return { fields: mapper(this.fields) }; },
+		},
+	};
 
 	await hooks["tool.definition"]({ toolID: "bash" }, definition);
 	await structuredRejection(() =>
@@ -291,6 +311,6 @@ test("the default plugin uses OpenCode hook inputs and redacted application logs
 		}),
 	);
 
-	assert.deepEqual(definition.parameters.properties.directory.enum, APPROVED_DIRECTORY_ALIASES);
+	assert.deepEqual(Object.keys(definition.parameters.fields), ["command", "directory", "timeout"]);
 	assert.equal(JSON.stringify(logs).includes("/private/secret"), false);
 });

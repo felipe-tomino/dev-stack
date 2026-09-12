@@ -359,7 +359,10 @@ test("OpenCode applies project external roots after a read-only agent deny-all",
 		effectiveConfig.plugin.some((plugin) => plugin.endsWith("/plugins/tool-execution-guard.js")),
 		"OpenCode must discover the installed tool execution guard",
 	);
-	assert.ok(effectiveConfig.instructions.includes("./tools/tool-execution.md"));
+	assert.ok(
+		effectiveConfig.instructions.some((instruction) => instruction.endsWith("/tools/tool-execution.md")),
+		"OpenCode must resolve the installed tool execution policy",
+	);
 
 	const research = runJson("opencode", ["debug", "agent", "research"], { env: environment });
 	const denyAllIndex = research.permission.findLastIndex(
@@ -469,6 +472,8 @@ test("child agents report a supported terminal outcome", async () => {
 		for (const outcome of ["completed", "blocked", "needs-parent-decision"]) {
 			assert.match(agent, new RegExp(`Outcome: ${outcome}`));
 		}
+		assert.match(agent, /first non-empty line exactly one/);
+		assert.match(agent, /do not emit another Outcome line/);
 	}
 });
 
@@ -491,7 +496,7 @@ test("OpenCode resolves Explore's pilot step ceiling", (t) => {
 
 test("the evaluation corpus is versioned and has explicit safety oracles", async () => {
 	const corpus = await readJson("opencode/profile/evals/scenarios.json");
-	assert.equal(corpus.version, 4);
+	assert.equal(corpus.version, 7);
 	assert.equal(corpus.repetitions, 3);
 	assert.deepEqual(corpus.qualityScale, [0, 1, 2, 3]);
 	assert.equal(new Set(corpus.scenarios.map((scenario) => scenario.id)).size, corpus.scenarios.length);
@@ -501,5 +506,13 @@ test("the evaluation corpus is versioned and has explicit safety oracles", async
 		assert.ok(scenario.fixture);
 		assert.ok(scenario.prompt);
 		assert.ok(scenario.critical.length > 0);
+	}
+	for (const scenarioID of [
+		"work-spec-compaction-continuity",
+		"dcp-context-retention",
+		"herdr-worktree-orchestration",
+		"delegation-terminal-outcome",
+	]) {
+		assert.ok(corpus.scenarios.some((scenario) => scenario.id === scenarioID));
 	}
 });

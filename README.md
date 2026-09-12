@@ -51,7 +51,7 @@ After changing the repository-owned profile or TUI integration, synchronize it w
 node opencode/profile-sync.mjs
 ```
 
-The command makes the installed configuration and agent directory mirror the repository, deleting agent definitions and backups that are not tracked here. Model selections come from `opencode/profile/opencode.jsonc`; unrelated non-agent OCX components remain installed. Inside Herdr the command restarts idle OpenCode panes through the stable launcher and resumes their existing session IDs. Exiting OCX releases those panes' temporary snapshots. Working, blocked, current, or sessionless panes are reported and left untouched; their live snapshots are never deleted.
+The command makes the installed configuration and agent directory mirror the repository, deleting agent definitions and backups that are not tracked here. It installs the profile dependencies from `opencode/profile/package-lock.json` with `npm ci --ignore-scripts`; repository-local `node_modules` is neither mirrored nor fingerprinted. The installed server and TUI configurations resolve DCP from that installed dependency tree rather than asking OpenCode to fetch a package dynamically. Model selections come from `opencode/profile/opencode.jsonc`; unrelated non-agent OCX components remain installed. Inside Herdr the command restarts idle OpenCode panes through the stable launcher and resumes their existing session IDs. Exiting OCX releases those panes' temporary snapshots. Working, blocked, current, or sessionless panes are reported and left untouched; their live snapshots are never deleted.
 
 The snapshot records the selected primary and small models. Agents without an explicit model inherit the profile selection.
 
@@ -101,6 +101,12 @@ Before publishing to a public repository, Build inspects the complete outgoing c
 
 Repository-owned philosophy skills follow the nearest project contracts and patterns before proposing new abstractions or visual language. The separate **Testing Philosophy** skill guides whether and where tests add useful evidence; **TDD Seams** remains an optional workflow for observable behavior with an independent oracle.
 
+Build persists each implementation's complete Markdown work spec outside the repository under OpenCode's state directory. The record is scoped to the project, worktree, and root session; permitted local and private child sessions can read the same record, while Web Researcher cannot. Writes replace the record atomically, compaction injects it into continuation context, invalid state fails loudly, and deleting the root session removes it. Work specs are limited to 32 KiB and never fall back to repository files automatically.
+
+Inside Herdr, Build can list current-repository worktrees and request typed create, open, and remove operations. Herdr remains the sole lifecycle and workspace-state owner: the profile never runs raw Git worktree lifecycle commands, chooses a path, or keeps another registry. Creation requires an explicit branch, base, and complete accepted work spec, preserves focus by default, and starts the stable `ws` launcher with that spec as the new Build session's prefill. Opening starts a new session only when a spec is supplied and the workspace has one idle shell. Removal requires an explicit permission prompt plus exact workspace-ID confirmation and refuses the source or current workspace. Outside Herdr, these operations fail without a Git fallback.
+
+The profile pins Dynamic Context Pruning (DCP) `3.1.15` in both server and TUI configuration. Runtime smoke verifies the installed package identity; `/dcp` exposes the active mode but does not display the package version. DCP initially runs in manual mode with automatic strategies and subagent processing disabled, recent turns and user messages protected, visible compression summaries, and confirmation required before compression. Use `/dcp` to inspect it and `/dcp-compress [focus]` to request a manual compression. DCP debug logging remains enabled during the initial retention evaluation; project-local `.opencode/dcp.json(c)` files take precedence over the profile.
+
 When any primary agent produces or edits communication intended for use outside the current chat, it loads the shared **Writing** skill. The active agent keeps ownership of the underlying facts, decisions, findings, or implementation while the skill shapes that established context into ready-to-use communication.
 
 OpenCode uses project `CLAUDE.md` as a compatibility fallback only when no applicable `AGENTS.md` exists. Profile instructions remain additive. When both project file types exist, `AGENTS.md` wins rather than merging with `CLAUDE.md`.
@@ -125,13 +131,11 @@ This changes the model-facing Bash payload: use `directory: "app"` instead of `w
 
 Connected data is sent to the configured model provider when an agent reads it. The `linear-read_*` and `slack-read_*` permission patterns assume those namespaces contain read-only tools; review the effective tool list whenever integrations change.
 
+The profile disables the inherited `github-read` MCP because its current read-only endpoint cannot complete OpenCode's dynamic-client authentication flow. The local `github-source-read` plugin instead exposes three typed operations for commit verification, one-directory listing, and UTF-8 file reads. Every operation requires the same explicit full commit SHA; branches, tags, abbreviated revisions, redirects, binary files, Git LFS pointers, and default-branch fallbacks are rejected. File responses are capped at 256 KiB and directory responses at 1,000 entries. The plugin uses `GH_TOKEN` or `GITHUB_TOKEN` when present, otherwise it reads the active GitHub CLI token without logging it; unauthenticated public reads remain possible. Only Research, Review, Researcher, and Reviewer receive these private-source tools.
+
 External local paths require permission by default, so one project does not receive access to sibling repositories or parent directories. A project can declare narrow exceptions in its own `.opencode/opencode.jsonc`; this repository allows its owned Herdr configuration, installed `ws` profile, TUI configuration, and TUI plugins. Read-only agents cannot edit files or run unrestricted shell commands. Build may edit the current project and project-specific external roots, but its unrestricted shell is a trusted capability rather than an OS-level filesystem sandbox. These are personal trust choices, not recommended defaults for an unfamiliar environment.
 
-Run `node --test opencode/profile/permissions.test.mjs opencode/profile/profile-contracts.test.mjs` after changing profile policy, components, or project permissions.
-Use `REQUIRE_OCX_RUNTIME=1` when runtime integration is required; missing OCX or OpenCode binaries then
-fail instead of skipping integration checks. The suite checks global and project external roots,
-read-only Git restrictions, delegation contracts, Build's trust boundary, retired primary agents,
-and Web Researcher's local-data isolation.
+Run `node --test opencode/profile/permissions.test.mjs opencode/profile/profile-contracts.test.mjs` after changing profile policy, components, or project permissions. `node opencode/profile-smoke.mjs` installs the repository snapshot into a temporary profile and compares its files and semantic fingerprint without credentials or provider calls. Add `--runtime` to require installed OCX and OpenCode binaries and verify the resolved profile, launcher, agents, skills, plugins, and key permissions. The policy suite checks global and project external roots, read-only Git restrictions, delegation contracts, Build's trust boundary, retired primary agents, and Web Researcher's local-data isolation.
 
 The hybrid harness protocol in `opencode/profile/evals/` adds repeatable live prompts and a manual
 scorecard for behavior that static permission assertions cannot establish. Keep actual run records,
@@ -143,11 +147,16 @@ Public agent files use role names only. Personal names, personas, credentials, a
 
 ## Test the custom plugin
 
-The custom plugins use only Node.js built-ins:
+The repository-owned plugins otherwise use Node.js built-ins; the execution guard consumes OpenCode's installed plugin schema, and DCP is the pinned third-party runtime dependency. Run the focused checks with:
 
 ```bash
 node --test opencode/profile/tool-execution-guard.test.js
+node --test opencode/profile/session-work-spec.test.js
+node --test opencode/profile/github-source-read.test.js
+node --test opencode/profile/herdr-worktree.test.js
+node --test opencode/dcp-config.test.mjs
 node --test opencode/profile-sync.test.mjs
+node --test opencode/profile-smoke.test.mjs
 node --test opencode/tui-plugins/herdr-tui.test.js
 node --test opencode/tui-plugins/hunk-review.test.js
 ```

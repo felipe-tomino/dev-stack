@@ -5,12 +5,13 @@ import { chmod, cp, mkdir, mkdtemp, readFile, rename, rm, writeFile } from "node
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { executeHerdr, quoteShellArgument, waitForPaneShell } from "./tui-plugins/herdr-tui.js";
 
 const executeFile = promisify(execFile);
 const PROFILE_NAME = "ws";
+const DCP_PACKAGE = "@tarquinen/opencode-dcp@3.1.15";
 const TUI_PLUGIN_FILES = ["herdr-tui.js", "hunk-review.js"];
 
 function parseJsonDocument(contents, filePath) {
@@ -23,6 +24,53 @@ function parseJsonDocument(contents, filePath) {
 
 async function readJsonDocument(filePath) {
 	return parseJsonDocument(await readFile(filePath, "utf8"), filePath);
+}
+
+export function createInstalledProfileConfig(sourceConfig, targetProfileDir) {
+	if (
+		sourceConfig.instructions !== undefined &&
+		(!Array.isArray(sourceConfig.instructions) || sourceConfig.instructions.some((entry) => typeof entry !== "string"))
+	) {
+		throw new Error("Profile instructions must be an array of paths or URLs.");
+	}
+	if (
+		sourceConfig.plugin !== undefined &&
+		(!Array.isArray(sourceConfig.plugin) || sourceConfig.plugin.some((entry) => typeof entry !== "string"))
+	) {
+		throw new Error("Profile plugins must be an array of package specifications.");
+	}
+
+	return {
+		...sourceConfig,
+		...(sourceConfig.instructions === undefined ? {} : { instructions: sourceConfig.instructions.map((entry) => {
+			if (path.isAbsolute(entry) || entry.startsWith("~") || /^[A-Za-z][A-Za-z0-9+.-]*:\/\//.test(entry)) {
+				return entry;
+			}
+			return path.resolve(targetProfileDir, entry);
+		}) }),
+		...(sourceConfig.plugin === undefined ? {} : { plugin: sourceConfig.plugin.map((entry) => (
+			entry === DCP_PACKAGE
+				? pathToFileURL(path.join(targetProfileDir, "node_modules/@tarquinen/opencode-dcp/dist/index.js")).href
+				: entry
+		)) }),
+	};
+}
+
+export function createInstalledTuiConfig(sourceConfig, targetProfileDir) {
+	if (
+		sourceConfig.plugin !== undefined &&
+		(!Array.isArray(sourceConfig.plugin) || sourceConfig.plugin.some((entry) => typeof entry !== "string"))
+	) {
+		throw new Error("TUI plugins must be an array of package specifications.");
+	}
+	return {
+		...sourceConfig,
+		...(sourceConfig.plugin === undefined ? {} : { plugin: sourceConfig.plugin.map((entry) => (
+			entry === DCP_PACKAGE
+				? pathToFileURL(path.join(targetProfileDir, "node_modules/@tarquinen/opencode-dcp/tui.tsx")).href
+				: entry
+		)) }),
+	};
 }
 
 async function mirrorDirectory(sourceDirectory, targetDirectory) {
@@ -58,6 +106,7 @@ export async function syncProfile({ sourceProfileDir, targetProfileDir }) {
 	const targetConfigPath = path.join(targetProfileDir, "opencode.jsonc");
 	const sourceConfig = await readJsonDocument(sourceConfigPath);
 	const sourceAgentDirectory = path.join(sourceProfileDir, "agents");
+	const sourceDependencyDirectory = path.join(sourceProfileDir, "node_modules");
 	const targetAgentDirectory = path.join(targetProfileDir, "agents");
 
 	await mkdir(targetProfileDir, { recursive: true });
@@ -65,14 +114,37 @@ export async function syncProfile({ sourceProfileDir, targetProfileDir }) {
 		recursive: true,
 		force: true,
 		filter: (sourcePath) =>
-			sourcePath !== sourceAgentDirectory && !sourcePath.startsWith(`${sourceAgentDirectory}${path.sep}`),
+			!([
+				sourceAgentDirectory,
+				sourceDependencyDirectory,
+			].some((excludedDirectory) => (
+				sourcePath === excludedDirectory || sourcePath.startsWith(`${excludedDirectory}${path.sep}`)
+			))),
 	});
-	await writeFile(targetConfigPath, `${JSON.stringify(sourceConfig, null, "\t")}\n`);
+	await writeFile(
+		targetConfigPath,
+		`${JSON.stringify(createInstalledProfileConfig(sourceConfig, targetProfileDir), null, "\t")}\n`,
+	);
 	await mirrorDirectory(sourceAgentDirectory, targetAgentDirectory);
 
 	const launcherPath = path.join(targetProfileDir, "bin/opencode-ws");
 	await chmod(launcherPath, 0o755);
 	return { launcherPath };
+}
+
+export async function installProfileDependencies({
+	profileDirectory,
+	execute = executeFile,
+}) {
+	await execute(
+		"npm",
+		["ci", "--ignore-scripts", "--no-audit", "--no-fund"],
+		{
+			cwd: profileDirectory,
+			encoding: "utf8",
+			maxBuffer: 2 * 1024 * 1024,
+		},
+	);
 }
 
 export function planIdleSessionRefresh(agents, { currentPaneID, profileName = PROFILE_NAME } = {}) {
@@ -130,7 +202,7 @@ export async function refreshIdleSessions({
 	return { refreshed, failed };
 }
 
-async function syncTuiFiles({ repositoryRoot, openCodeConfigDir }) {
+async function syncTuiFiles({ repositoryRoot, openCodeConfigDir, targetProfileDir }) {
 	const sourcePluginDirectory = path.join(repositoryRoot, "opencode/tui-plugins");
 	const targetPluginDirectory = path.join(openCodeConfigDir, "tui-plugins");
 	await mkdir(targetPluginDirectory, { recursive: true });
@@ -139,9 +211,12 @@ async function syncTuiFiles({ repositoryRoot, openCodeConfigDir }) {
 			force: true,
 		});
 	}
-	await cp(path.join(repositoryRoot, "opencode/tui.jsonc"), path.join(openCodeConfigDir, "tui.jsonc"), {
-		force: true,
-	});
+	const sourceTuiConfig = await readJsonDocument(path.join(repositoryRoot, "opencode/tui.jsonc"));
+	const installedTuiConfig = createInstalledTuiConfig(sourceTuiConfig, targetProfileDir);
+	await writeFile(
+		path.join(openCodeConfigDir, "tui.jsonc"),
+		`${JSON.stringify(installedTuiConfig, null, "  ")}\n`,
+	);
 }
 
 async function listHerdrAgents() {
@@ -207,7 +282,8 @@ export async function main({ environment = process.env } = {}) {
 		sourceProfileDir: path.join(repositoryRoot, "opencode/profile"),
 		targetProfileDir,
 	});
-	await syncTuiFiles({ repositoryRoot, openCodeConfigDir });
+	await installProfileDependencies({ profileDirectory: targetProfileDir });
+	await syncTuiFiles({ repositoryRoot, openCodeConfigDir, targetProfileDir });
 
 	let refreshed = [];
 	let deferred = [];

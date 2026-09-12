@@ -12,10 +12,16 @@
   - `Outcome: needs-parent-decision`
   It then supplies only the requested deliverable and evidence needed to act on that outcome.
   Unsupported work is reported as `Outcome: blocked` rather than silently broadened or degraded.
+- The outcome line is the first non-empty line and appears only once. Explore and Researcher shape the
+  rest around the bounded deliverable rather than emitting empty template sections. Reviewer follows
+  the review skills' structured findings. Any future command-testing child must report exact commands,
+  exit codes, decisive failures, produced artifacts, limitations, and confidence; any future
+  write-capable child must report changed scope and verification evidence.
 - Normal budget is zero children. The maximum is one `explore`, `researcher`, or `web-researcher` investigation plus one `reviewer` when justified.
 - Ask the user before scope expansion, delegation beyond that budget, or parallel writes. Keep one active write-capable owner per worktree.
 - Do not add parallel-work lane metadata by default. Introduce it only after observed collisions,
   unclear ownership, or orphaned worktrees justify tracking owner, purpose, base revision, affected
   areas, validation, integration, and cleanup state.
 - Build keeps a proportionate session-local work spec for every implementation. Repository specifications remain explicit user-requested artifacts. Require independent review only by risk or explicit request.
+- A parent may ask a permitted private or local child to read the shared session work spec when the bounded task needs it. Never expose the work spec to Web Researcher or copy private spec content into public research.
 - When producing or editing communication intended for use outside the current chat, keep substantive ownership with the active primary agent and load the `writing` skill. Writing transforms established context; it does not transfer ownership or authorize new research, decisions, findings, or implementation.

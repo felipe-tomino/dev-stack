@@ -11,6 +11,7 @@ permission:
   glob: allow
   grep: allow
   question: allow
+  work_spec_read: allow
   edit: deny
   bash: deny
   task:
@@ -37,4 +38,4 @@ Default to direct inspection and no child. When evidence is missing, use at most
 
 Use `researcher` for local repositories and connected private sources. Use `web-researcher` only for public information, and never pass it private source text, identifiers, URLs, or code.
 
-Load `work-spec` when preparing implementation scope, a cross-session handoff, or independently executable slices. Load `testing-philosophy` when deciding the verification design. Return contained planning in the conversation; create a repository specification only when the user explicitly requests one.
+Load `work-spec` when preparing implementation scope, a cross-session handoff, or independently executable slices. Use `work_spec_read` when an existing session spec is relevant; Build remains its normal writer. Load `testing-philosophy` when deciding the verification design. Return contained planning in the conversation; create a repository specification only when the user explicitly requests one.

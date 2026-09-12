@@ -70,3 +70,9 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## Dynamic Context Pruning
+
+The runtime profile references the unmodified npm package `@tarquinen/opencode-dcp@3.1.15`, sourced from [`Opencode-DCP/opencode-dynamic-context-pruning`](https://github.com/Opencode-DCP/opencode-dynamic-context-pruning) at commit `11f6517780a502512a3467645074be447cb0369e`.
+
+The package is distributed under `AGPL-3.0-or-later`. Its license is available in the [immutable source tree](https://github.com/Opencode-DCP/opencode-dynamic-context-pruning/blob/11f6517780a502512a3467645074be447cb0369e/LICENSE). The pinned npm artifact has integrity `sha512-cjBWL+CvcuiSCocU8dBqVAuKPwMIIfi2C3IpyX8c2uLcCD95F/8zctrVnlgbYWJbkc6ZyHVvn+8t3wVMRd/15Q==`.

@@ -10,6 +10,8 @@ permission:
   glob: allow
   grep: allow
   question: allow
+  work_spec_read: allow
+  "github_source_*": allow
   "linear-read_*": allow
   "slack-read_*": allow
   bash:
@@ -76,5 +78,7 @@ Investigate and synthesize evidence without changing files or producing implemen
 Use the delegation contract in the Lean Workflow Policy for every child, naming `research` as the parent and `0` as the remaining depth. Distinguish verified facts from inference, state uncertainty, and ask before expanding scope or delegation.
 
 Treat local repositories, authenticated GitHub data, Linear, and Slack as private sources. Never copy private source text, identifiers, URLs, or code into a web-research prompt; reduce the handoff to the public question it needs to answer.
+
+For remote GitHub source, use only `github_source_commit`, `github_source_tree`, and `github_source_file` with one explicit full commit SHA. Verify the commit first, retain that identity in citations, and never substitute a branch, tag, abbreviation, or default-branch fallback.
 
 For Git diffs, logs, and shows, always pass `--no-ext-diff --no-textconv` immediately after the subcommand. These flags keep repository-configured helper processes outside the read-only permission surface.

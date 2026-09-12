@@ -47,7 +47,9 @@ Exact checks that establish completion.
 ## Current state
 Mark the active slice, completed evidence, blockers, and exact resume point.
 
-Keep unresolved decisions visible instead of disguising them as tasks. Store the spec through the profile's session-local persistence mechanism when available. Until that mechanism is available, keep it in the conversation and report that cross-session persistence is unavailable. Never create a repository file as an automatic fallback.
+Keep unresolved decisions visible instead of disguising them as tasks. Build persists the complete current Markdown spec with `work_spec_write`; `work_spec_read` returns the same root-session record to permitted primary and private/local child roles. Update the record instead of appending partial fragments. Compaction injects the current record automatically. Never create a repository file as an automatic fallback.
+
+Use `work_spec_read` when answering a request for persisted exact values, even when compacted context appears to contain them. Copy persisted literals and commands verbatim; do not reconstruct or correct them.
 
 ## Cross-session handoff
 

@@ -4,7 +4,7 @@ This document records the comparison between this repository's `ws` OpenCode pro
 
 ## Status and ownership
 
-- **Status:** Decision pass complete; foundation source implemented with live evaluation pending
+- **Status:** Accepted source and deterministic integrations implemented; repeated live evaluation pending
 - **Decision owner:** Repository maintainer
 - **Comparison date:** 2026-09-11
 - **Local baseline:** `daecebe3a5dac3f19ada8848fb543df3c71c3fe6` on `main`, plus the two pre-existing working-tree changes named below
@@ -16,13 +16,13 @@ This document records the comparison between this repository's `ws` OpenCode pro
 | Slice | Findings | State |
 | --- | --- | --- |
 | Policy and methodology foundation | `KEEP-03`, `ADOPT-01`–`ADOPT-05`, `ADOPT-07`, `ADOPT-08`, `CHANGE-02`, `CHANGE-03`, `REJECT-06` | Profile source and deterministic contracts implemented; repeated live evaluation pending |
-| Session-local work-spec persistence | `OPTION-03`, `REJECT-03` | Pending |
-| Installed-profile smoke and semantic fingerprints | `ADOPT-06`, `ADOPT-10` | Pending |
-| Immutable GitHub source reads | `CHANGE-01` | Pending |
-| OpenCode-to-Herdr worktree orchestration | `KEEP-04`, `REJECT-02` | Pending dedicated design |
-| DCP integration | `OPTION-04` | Pending release and license review |
-| Hybrid role result contracts | `ADOPT-09` | Pending |
-| Broader deterministic and behavioral evaluation | `KEEP-05` | Foundation scenarios added; later integration scenarios pending |
+| Session-local work-spec persistence | `OPTION-03`, `REJECT-03` | Root-scoped atomic storage, child reads, compaction injection, cleanup, permissions, and deterministic tests implemented; live compaction run pending |
+| Installed-profile smoke and semantic fingerprints | `ADOPT-06`, `ADOPT-10` | Temporary-profile install smoke and opt-in OCX/OpenCode runtime fingerprints implemented and passing |
+| Immutable GitHub source reads | `CHANGE-01` | Incompatible inherited MCP disabled; narrow commit, tree, and file-at-SHA plugin plus deterministic boundaries implemented; live tool run pending |
+| OpenCode-to-Herdr worktree orchestration | `KEEP-04`, `REJECT-02` | Dedicated lifecycle design, typed Herdr routing, work-spec prefill, focus/removal/failure policy, and deterministic tests implemented; disposable Herdr run pending |
+| DCP integration | `OPTION-04` | Exact `3.1.15` server/TUI pin, AGPL notice, conservative manual policy, package identity check, and server runtime smoke implemented; TUI retention run pending |
+| Hybrid role result contracts | `ADOPT-09` | Single first-line Outcome contract and role-shaped reporting implemented; repeated child runs pending |
+| Broader deterministic and behavioral evaluation | `KEEP-05` | Scenario corpus version 7 covers the accepted integrations; coordinated three-run evaluation pending |
 
 Deferred model and role findings remain unchanged until the dedicated study. This table tracks implementation evidence without changing the accepted decision states below.
 

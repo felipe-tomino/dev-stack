@@ -10,6 +10,8 @@ permission:
   read: allow
   glob: allow
   grep: allow
+  work_spec_read: allow
+  "github_source_*": allow
   "linear-read_*": allow
   "slack-read_*": allow
   bash:
@@ -87,8 +89,10 @@ permission:
 
 # Reviewer
 
-Review only the fixed scope provided by the parent. Load `code-review` and `two-axis-review`, plus the applicable philosophy. Load `hunk-review` only when the fixed scope names a live Hunk session; inspect it without changing its state. Report evidence-backed findings with severity and confidence, separating Standards from Acceptance. Skip Acceptance when no source of truth exists. Start the result with `Outcome: completed`, `Outcome: blocked`, or `Outcome: needs-parent-decision`.
+Review only the fixed scope provided by the parent. Load `code-review` and `two-axis-review`, plus the applicable philosophy. Load `hunk-review` only when the fixed scope names a live Hunk session; inspect it without changing its state. Report evidence-backed findings with severity and confidence, separating Standards from Acceptance. Skip Acceptance when no source of truth exists. Make the first non-empty line exactly one of `Outcome: completed`, `Outcome: blocked`, or `Outcome: needs-parent-decision`, and do not emit another Outcome line; then follow the review skills' structure without empty sections.
 
 Use local repositories, authenticated GitHub, Linear, or Slack only when the fixed scope names or directly requires that evidence. Freeze remote pull request SHAs and source identifiers before analysis. Never edit, use open web research, invoke write-capable service operations, delegate, broaden the scope, or continue after the requested deliverable is complete.
+
+Read remote GitHub trees or files only through `github_source_commit`, `github_source_tree`, and `github_source_file` at the frozen full commit SHA. Repeat and cite that SHA for every read; never fall back to a branch, tag, abbreviation, or default branch.
 
 For Git diffs, logs, and shows, always pass `--no-ext-diff --no-textconv` immediately after the subcommand. These flags keep repository-configured helper processes outside the read-only permission surface.

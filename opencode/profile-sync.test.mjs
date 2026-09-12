@@ -7,6 +7,8 @@ import { promisify } from "node:util";
 import test from "node:test";
 
 import {
+	createInstalledTuiConfig,
+	installProfileDependencies,
 	planIdleSessionRefresh,
 	refreshIdleSessions,
 	syncProfile,
@@ -14,6 +16,24 @@ import {
 
 const execFileAsync = promisify(execFile);
 const launcherPath = path.join(import.meta.dirname, "profile/bin/opencode-ws");
+
+test("profile dependency installation uses the exact lockfile without lifecycle scripts", async () => {
+	const calls = [];
+	await installProfileDependencies({
+		profileDirectory: "/profiles/ws",
+		execute: async (...args) => { calls.push(args); },
+	});
+
+	assert.deepEqual(calls, [[
+		"npm",
+		["ci", "--ignore-scripts", "--no-audit", "--no-fund"],
+		{
+			cwd: "/profiles/ws",
+			encoding: "utf8",
+			maxBuffer: 2 * 1024 * 1024,
+		},
+	]]);
+});
 
 async function temporaryDirectory(t, prefix) {
 	const directory = await mkdtemp(path.join(os.tmpdir(), prefix));
@@ -34,7 +54,10 @@ test("profile sync mirrors repository config and agents while preserving non-age
 	await writeJson(path.join(sourceProfileDir, "opencode.jsonc"), {
 		$schema: "https://opencode.ai/config.json",
 		default_agent: "build",
+		instructions: ["./tools/policy.md"],
 	});
+	await mkdir(path.join(sourceProfileDir, "tools"), { recursive: true });
+	await writeFile(path.join(sourceProfileDir, "tools/policy.md"), "installed policy\n");
 	await mkdir(path.join(sourceProfileDir, "agents"), { recursive: true });
 	await writeFile(path.join(sourceProfileDir, "agents/build.md"), "current build\n");
 	await mkdir(path.join(sourceProfileDir, "bin"), { recursive: true });
@@ -60,6 +83,7 @@ test("profile sync mirrors repository config and agents while preserving non-age
 	assert.deepEqual(installedConfig, {
 		$schema: "https://opencode.ai/config.json",
 		default_agent: "build",
+		instructions: [path.join(targetProfileDir, "tools/policy.md")],
 	});
 	assert.deepEqual(await readdir(path.join(targetProfileDir, "agents")), ["build.md"]);
 	assert.equal(await readFile(path.join(targetProfileDir, "agents/build.md"), "utf8"), "current build\n");
@@ -80,6 +104,20 @@ test("repository profile tracks the selected models", async () => {
 
 	assert.equal(profileConfig.model, "openai/gpt-5.6-sol");
 	assert.equal(profileConfig.small_model, "openai/gpt-5.6-luna");
+});
+
+test("installed TUI config resolves DCP to the locked profile package", () => {
+	assert.deepEqual(
+		createInstalledTuiConfig({
+			plugin: ["./local.js", "@tarquinen/opencode-dcp@3.1.15"],
+		}, "/profiles/ws"),
+		{
+			plugin: [
+				"./local.js",
+				"file:///profiles/ws/node_modules/@tarquinen/opencode-dcp/tui.tsx",
+			],
+		},
+	);
 });
 
 test("idle refresh planning requires an OpenCode session ID and never selects the caller", () => {

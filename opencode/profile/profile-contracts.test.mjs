@@ -69,6 +69,7 @@ test("Build uses risk-based confirmation, work specs, proportional tests, and Co
 	assert.match(build, /clear, low-risk implementation request as authorization/);
 	assert.match(build, /when the user asks to review the approach first/);
 	assert.match(build, /destructive, irreversible, externally visible, or high cost/);
+	assert.match(build, /explain the concrete irreversible consequences before requesting confirmation/i);
 	assert.match(build, /Commit, push, pull-request, publication, and external-path authorization remain separate/);
 	assert.match(build, /explicit request to push to a known public repository covers reviewed names/);
 	assert.match(build, /required by third-party licenses or needed to identify public sources/);
@@ -103,6 +104,77 @@ test("work specs preserve decisions, interfaces, operations, verification, and r
 		assert.match(workSpec, new RegExp(`^${heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "m"));
 	}
 	assert.match(workSpec, /Never create a repository file as an automatic fallback/);
+	assert.match(workSpec, /Use `work_spec_read` when answering a request for persisted exact values/);
+	assert.match(workSpec, /Copy persisted literals and commands verbatim; do not reconstruct or correct them/);
+});
+
+test("session work-spec tools preserve one writer and the private evidence boundary", async () => {
+	const profile = await readJson("opencode.jsonc");
+	assert.equal(profile.permission.work_spec_read, "deny");
+	assert.equal(profile.permission.work_spec_write, "deny");
+
+	for (const agentName of ["build", "plan", "research", "review", "explore", "researcher", "reviewer"]) {
+		const agent = await readProfileFile(`agents/${agentName}.md`);
+		assert.match(agent, /^  work_spec_read: allow$/m, `${agentName} cannot read the session work spec`);
+	}
+
+	const build = await readProfileFile("agents/build.md");
+	assert.match(build, /^  work_spec_write: allow$/m);
+	assert.match(build, /do not make the first edit until `work_spec_write` succeeds/);
+	for (const agentName of ["plan", "research", "review", "explore", "researcher", "reviewer", "web-researcher"]) {
+		const agent = await readProfileFile(`agents/${agentName}.md`);
+		assert.doesNotMatch(agent, /^  work_spec_write: allow$/m, `${agentName} must not write work specs`);
+	}
+	const webResearcher = await readProfileFile("agents/web-researcher.md");
+	assert.doesNotMatch(webResearcher, /^  work_spec_read: allow$/m);
+});
+
+test("typed GitHub source reads require immutable commits and stay private", async () => {
+	const profile = await readJson("opencode.jsonc");
+	assert.equal(profile.permission["github_source_*"], "deny");
+	assert.equal(profile.mcp["github-read"].enabled, false);
+
+	for (const agentName of ["research", "review", "researcher", "reviewer"]) {
+		const agent = await readProfileFile(`agents/${agentName}.md`);
+		assert.match(agent, /^  "github_source_\*": allow$/m);
+		assert.match(agent, /full commit SHA/);
+		assert.match(agent, /branch/i);
+	}
+	for (const agentName of ["build", "plan", "explore", "web-researcher"]) {
+		const agent = await readProfileFile(`agents/${agentName}.md`);
+		assert.doesNotMatch(agent, /^  "github_source_\*": allow$/m);
+	}
+
+	const plugin = await readProfileFile("plugins/github-source-read.js");
+	assert.match(plugin, /github_source_commit/);
+	assert.match(plugin, /github_source_tree/);
+	assert.match(plugin, /github_source_file/);
+	assert.doesNotMatch(plugin, /tool\.schema\.string\(\).*method|tool\.schema\.string\(\).*url/);
+});
+
+test("typed worktree orchestration keeps Herdr as lifecycle and state owner", async () => {
+	const profile = await readJson("opencode.jsonc");
+	assert.equal(profile.permission["herdr_worktree_*"], "deny");
+	const build = await readProfileFile("agents/build.md");
+	assert.match(build, /^  herdr_worktree_list: allow$/m);
+	for (const operation of ["create", "open", "remove"]) {
+		assert.match(build, new RegExp(`^  herdr_worktree_${operation}: ask$`, "m"));
+	}
+	for (const agentName of ["plan", "research", "review", "explore", "researcher", "reviewer", "web-researcher"]) {
+		const agent = await readProfileFile(`agents/${agentName}.md`);
+		assert.doesNotMatch(agent, /^  herdr_worktree_/m);
+	}
+
+	const policy = await readProfileFile("tools/herdr-worktrees.md");
+	assert.match(policy, /Herdr chooses the path and owns the workspace/);
+	assert.match(policy, /never auto-remove after a partial create or launch failure/);
+	assert.match(policy, /Do not fall back to Git/);
+	const plugin = await readProfileFile("plugins/herdr-worktree.js");
+	assert.match(plugin, /herdr_worktree_create/);
+	assert.match(plugin, /herdr_worktree_open/);
+	assert.match(plugin, /herdr_worktree_list/);
+	assert.match(plugin, /herdr_worktree_remove/);
+	assert.doesNotMatch(plugin, /git worktree|execFile\("git"/);
 });
 
 test("the review command routes to Review and preserves the two-axis boundary", async () => {
@@ -141,6 +213,10 @@ test("OpenCode resolves the local foundation components", (t) => {
 	const config = runOpenCodeDebug(["config"]);
 	assert.equal(config.command?.review?.agent, "review");
 	assert.equal(config.command?.review?.subtask, false);
+	assert.ok(
+		config.plugin.some((plugin) => plugin.endsWith("/plugins/session-work-spec.js")),
+		"OpenCode must discover the session work-spec plugin",
+	);
 
 	const skills = runOpenCodeDebug(["skill"]);
 	for (const skillName of ["code-philosophy", "frontend-philosophy", "code-review", "testing-philosophy"]) {

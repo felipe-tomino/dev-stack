@@ -1,6 +1,6 @@
 {
 	"status": "incomplete",
-	"scenarioVersion": 1,
+	"scenarioVersion": 7,
 	"scenarioId": "direct-build",
 	"repetition": 1,
 	"repositoryCommit": "<commit>",
@@ -8,6 +8,9 @@
 	"profileCommit": "<commit>",
 	"ocxVersion": "<version>",
 	"opencodeVersion": "<version>",
+	"runtimeSmoke": "incomplete",
+	"dcpVersion": "3.1.15",
+	"dcpMode": "manual",
 	"providerModel": "<record-locally-do-not-commit-results>",
 	"modelOptions": {},
 	"fixtureState": "<git-status-and-head>",

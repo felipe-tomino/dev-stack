@@ -17,14 +17,24 @@
 			"disable": true
 		}
 	},
+	"plugin": [
+		"@tarquinen/opencode-dcp@3.1.15"
+	],
 	"permission": {
 		"task": "deny",
+		"work_spec_read": "deny",
+		"work_spec_write": "deny",
+		"github_source_*": "deny",
+		"herdr_worktree_*": "deny",
 		"context7_*": "deny",
 		"exa_*": "deny",
 		"gh_grep_*": "deny",
 		"webfetch": "deny"
 	},
 	"mcp": {
+		"github-read": {
+			"enabled": false
+		},
 		"context7": {
 			"type": "remote",
 			"url": "https://mcp.context7.com/mcp",

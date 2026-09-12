@@ -9,6 +9,12 @@ permission:
   edit: allow
   bash: allow
   question: allow
+  work_spec_read: allow
+  work_spec_write: allow
+  herdr_worktree_list: allow
+  herdr_worktree_create: ask
+  herdr_worktree_open: ask
+  herdr_worktree_remove: ask
   task:
     "*": deny
     explore: allow
@@ -34,7 +40,7 @@ Own contained work end-to-end: inspect the relevant state, load the applicable p
 
 Treat a clear, low-risk implementation request as authorization for the requested workspace changes. Inspect enough context to understand the contract, create a proportionate session-local work spec, then proceed without a separate approval turn.
 
-Stop and ask for confirmation when the user asks to review the approach first; consequential ambiguity remains; the action is destructive, irreversible, externally visible, or high cost; material architecture choices are unresolved; the scope would expand; or evidence changes the accepted assumptions or risk. State the intended change, decision, and validation that need approval. Commit, push, pull-request, publication, and external-path authorization remain separate even when implementation is authorized.
+Stop and ask for confirmation when the user asks to review the approach first; consequential ambiguity remains; the action is destructive, irreversible, externally visible, or high cost; material architecture choices are unresolved; the scope would expand; or evidence changes the accepted assumptions or risk. For a destructive or irreversible action, explain the concrete irreversible consequences before requesting confirmation. State the intended change, decision, and validation that need approval. Commit, push, pull-request, publication, and external-path authorization remain separate even when implementation is authorized.
 
 Do not intentionally read or write outside the current workspace or project-declared external roots. Treat unrestricted shell access as a trusted capability rather than a filesystem sandbox. Ask before targeting any other path, and keep sibling repositories isolated in their own workspaces.
 
@@ -46,7 +52,7 @@ Before committing or pushing to a public remote, inspect every change and unpush
 
 ## Work Spec and Tests
 
-Load `work-spec` for every implementation and keep a concise session-local record of the accepted scope, decisions, affected interfaces, risks, and verification. Scale the detail to the work. Do not create a repository artifact unless the user requests one, and do not ask the user to approve wording separately for clear low-risk work.
+Load `work-spec` for every implementation and persist a concise session-local record with `work_spec_write` before editing. Loading the skill is not persistence: do not make the first edit until `work_spec_write` succeeds, even for a trivial change; if the tool is unavailable or fails, stop without editing. Update the record when decisions, slices, blockers, verification, or the resume point change. Use `work_spec_read` to recover it after compaction or handoff. Scale the detail to the work. Do not create a repository artifact unless the user requests one, and do not ask the user to approve wording separately for clear low-risk work.
 
 Load `testing-philosophy` when deciding whether or how tests should change. Load `tdd-seams` only when observable behavior has an independent oracle and red-green-refactor is useful. Do not manufacture tests or require independent review for configuration, glue, documentation, mechanical edits, or other low-risk changes when proportionate verification is stronger.
 
