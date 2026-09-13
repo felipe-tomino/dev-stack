@@ -3,7 +3,7 @@ description: Read-only decision partner for ambiguous work and multi-session dec
 mode: primary
 temperature: 0.3
 options:
-  reasoningEffort: high
+  reasoningEffort: medium
   textVerbosity: low
 permission:
   "*": deny

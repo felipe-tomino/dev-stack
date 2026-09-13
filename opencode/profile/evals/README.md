@@ -98,7 +98,7 @@ cross-model comparison; parallel output is throughput evidence only.
 Run the lanes in this order:
 
 1. Probe all exact model IDs and fingerprint temporary candidate configurations.
-2. Establish the direct Sol baseline with the `smoke` suite and any additional affected tags.
+2. Establish the direct Astra baseline with the `smoke` suite and any additional affected tags.
 3. Run one cross-model pilot for every representative lane, using the smallest scenario set that
    exercises that lane.
 4. Eliminate unsafe, unavailable, or clearly noncompetitive candidates.
@@ -112,6 +112,59 @@ ownership, Herdr lifecycle ownership, or separate publication authorization for 
 token savings. A specialist result includes every model call and handoff in its pipeline. Copy
 `model-result.example.json` outside the repository for each run and retain unavailable accounting or
 manual evidence as `incomplete`.
+
+## Hard-task optimization campaign
+
+Start from the public-guidance routing recorded in `model-study.json`: Astra at medium effort is the
+inherited baseline, Review and Reviewer use high effort, and Explore provisionally uses Terra at low
+effort. Sol is the first optimization comparator. Luna remains limited to lightweight system work
+until a bounded, automatically checked workload justifies an agent role. These are starting choices,
+not claims of local optimality.
+
+Build a 28-task corpus before optimizing the routing or topology. Cover seven workloads with four
+tasks each: implementation, architecture and planning, code and specification review, codebase
+exploration, internal evidence synthesis, public research, and independent review. Every workload has
+three hard tasks and one easy control. Hard tasks run three times from clean isolated state; easy
+controls start with one run and increase to three only when results vary.
+
+The hard tasks must expose the failure modes hidden by the current contained corpus:
+
+- Implementation covers multi-file behavior, a misleading failure, migration work, and recovery from
+  a partial implementation or failed tool call.
+- Architecture and planning covers rollback, conflicting nonfunctional constraints, incomplete
+  requirements, and operational failure modes.
+- Review covers a subtle seeded regression, a missing acceptance criterion, a security or concurrency
+  defect, and a plausible false-positive control.
+- Exploration covers cross-module symbol flow, generated or indirect configuration, ambiguous names,
+  and evidence split across implementation, tests, and documentation.
+- Internal synthesis and public research each cover conflicting sources, stale or date-sensitive
+  evidence, an unsupported or negative-evidence claim, and a provenance or source-quality trap.
+- Independent review covers code that passes basic tests but violates its specification, a
+  false-positive trap, a cross-file interaction, and high-risk severity prioritization.
+
+Run the campaign in three stages so model capability and coordination are not confounded:
+
+1. Establish the baseline with Astra medium on all tasks, Astra high on hard implementation,
+   planning, research, and review tasks, and Terra low on exploration.
+2. Compare plausible substitutions: Sol at matching effort, Terra medium on bounded work, and Luna
+   low only on simple exploration or extraction controls. Use Astra `xhigh` only where `high` still
+   misses a consequential defect.
+3. Compare topology on the same model and effort. Start with direct ownership, then add one bounded
+   read-only or review helper. Test manager-to-worker transfer or parallel workers only on genuinely
+   decomposable tasks with explicit integration ownership.
+
+Use deterministic graders first: tests, builds, type checks, exact end-state assertions, prohibited
+changes, seeded defect recall, and source citations. Calibrate rubric or model judging against human
+labels for maintainability, synthesis, and severity. Record pass-at-one, all-three reliability,
+critical failures, false positives, latency, token categories, cost per successful task, retries,
+owner intervention, unnecessary work, and escalation behavior. Inspect representative traces instead
+of relying only on aggregate scores.
+
+Promote a model or topology only when it introduces no critical-failure increase, is non-inferior on
+hard-task quality, succeeds consistently across repetitions, and either catches a consequential miss
+or improves median latency, tokens, or cost per successful task by at least 30 percent. Easy controls
+cannot justify promotion. Usage observations may add cases and tune routing, but may not weaken the
+hard invariants.
 
 ## Run protocol
 

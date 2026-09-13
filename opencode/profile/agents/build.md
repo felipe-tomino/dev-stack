@@ -3,7 +3,7 @@ description: Direct implementation owner for clear changes from inspection throu
 mode: primary
 temperature: 0.3
 options:
-  reasoningEffort: high
+  reasoningEffort: medium
   textVerbosity: low
 permission:
   edit: allow

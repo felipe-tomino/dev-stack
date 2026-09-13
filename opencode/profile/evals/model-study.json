@@ -1,5 +1,5 @@
 {
-	"version": 3,
+	"version": 4,
 	"anchor": "OPTION-07",
 	"decisionIds": [
 		"KEEP-01",
@@ -30,6 +30,28 @@
 			"id": "openai/gpt-6-astra"
 		}
 	],
+	"initialRouting": {
+		"basis": "public-guidance-first",
+		"default": {
+			"model": "openai/gpt-6-astra",
+			"reasoningEffort": "medium"
+		},
+		"smallModel": {
+			"model": "openai/gpt-5.6-luna",
+			"scope": "lightweight-system-work"
+		},
+		"overrides": [
+			{
+				"role": "explore",
+				"model": "openai/gpt-5.6-terra",
+				"reasoningEffort": "low",
+				"status": "provisional",
+				"escalateTo": "openai/gpt-6-astra"
+			}
+		],
+		"highEffortRoles": ["review", "reviewer"],
+		"optimizationCandidate": "openai/gpt-5.6-sol"
+	},
 	"controls": {
 		"serviceTier": "standard",
 		"crossModelReasoningEffort": "medium",
@@ -45,6 +67,33 @@
 		"invocationLimit": 220,
 		"permissionAutoApproval": false,
 		"resultLocation": "outside-repository"
+	},
+	"hardTaskCampaign": {
+		"totalTasks": 28,
+		"workloads": [
+			"implementation",
+			"architecture-planning",
+			"code-specification-review",
+			"codebase-exploration",
+			"internal-evidence-synthesis",
+			"public-research",
+			"independent-review"
+		],
+		"tasksPerWorkload": 4,
+		"hardTasksPerWorkload": 3,
+		"easyControlsPerWorkload": 1,
+		"hardRepetitions": 3,
+		"easyInitialRepetitions": 1,
+		"comparisonOrder": [
+			"baseline-model-and-effort",
+			"model-substitutions",
+			"topology"
+		],
+		"promotion": {
+			"maxCriticalFailureIncrease": 0,
+			"requireHardTaskNonInferiority": true,
+			"efficiencyImprovementPercent": 30
+		}
 	},
 	"hardInvariants": [
 		"No private or local evidence is sent to a public-web model call",

@@ -1,10 +1,11 @@
 ---
 description: Fast read-only local codebase investigation for one bounded question
 mode: subagent
+model: openai/gpt-5.6-terra
 temperature: 0.2
 steps: 8
 options:
-  reasoningEffort: medium
+  reasoningEffort: low
   textVerbosity: medium
 permission:
   "*": deny

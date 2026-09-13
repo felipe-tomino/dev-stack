@@ -4,9 +4,10 @@ This document records the comparison between this repository's `ws` OpenCode pro
 
 ## Status and ownership
 
-- **Status:** Accepted source and deterministic integrations implemented; repeated live evaluation pending
+- **Status:** Public-guidance model baseline and architecture decisions implemented; hard-task optimization campaign pending
 - **Decision owner:** Repository maintainer
 - **Comparison date:** 2026-09-11
+- **Model and agent-architecture study date:** 2026-09-13
 - **Local baseline:** `daecebe3a5dac3f19ada8848fb543df3c71c3fe6` on `main`, plus the two pre-existing working-tree changes named below
 - **Remote comparison point:** Workcell PR 19 head `c36ee1aaa06ca0dd57c5fcdbbcfe1d812d72589d`, merged as `77e6c5fef1941d113b21f63f4c4f7d74d2e086b5`
 - **Pre-existing local changes:** `.opencode/opencode.jsonc` and `opencode/profile/permissions.test.mjs`
@@ -22,9 +23,10 @@ This document records the comparison between this repository's `ws` OpenCode pro
 | OpenCode-to-Herdr worktree orchestration | `KEEP-04`, `REJECT-02` | Dedicated lifecycle design, typed Herdr routing, work-spec prefill, focus/removal/failure policy, and deterministic tests implemented; disposable Herdr run pending |
 | DCP integration | `OPTION-04` | Exact `3.1.15` server/TUI pin, AGPL notice, conservative manual policy, package identity check, and server runtime smoke implemented; TUI retention run pending |
 | Hybrid role result contracts | `ADOPT-09` | Single first-line Outcome contract and role-shaped reporting implemented; repeated child runs pending |
-| Broader deterministic and behavioral evaluation | `KEEP-05` | Scenario corpus version 7 covers the accepted integrations; coordinated three-run evaluation pending |
+| Broader deterministic and behavioral evaluation | `KEEP-05` | Scenario corpus version 9, progressive selection, and isolated campaign tooling implemented; coordinated three-run and manual extended evaluation pending |
+| Model and agent architecture | `KEEP-01`, `KEEP-02`, `KEEP-07`, `OPTION-01`, `OPTION-02`, `OPTION-05`, `OPTION-07`, `REJECT-01`, `REJECT-05` | Astra is the inherited public-guidance baseline and Explore provisionally uses Terra; 79 completed local calls establish contained-case compatibility only, while the 28-task hard campaign remains pending |
 
-Deferred model and role findings remain unchanged until the dedicated study. This table tracks implementation evidence without changing the accepted decision states below.
+The dedicated model and agent-architecture study resolved every deferred finding. The initial routing now follows current public guidance; later changes require hard-task evidence or observed usage rather than easy-case continuity.
 
 The Workcell evidence came from its README, pull-request inventory, and relevant profile diffs, especially PRs [6](https://github.com/matthewmorek/ocx-profile-workcell/pull/6), [8](https://github.com/matthewmorek/ocx-profile-workcell/pull/8), [12](https://github.com/matthewmorek/ocx-profile-workcell/pull/12), [14](https://github.com/matthewmorek/ocx-profile-workcell/pull/14), [15](https://github.com/matthewmorek/ocx-profile-workcell/pull/15), [17](https://github.com/matthewmorek/ocx-profile-workcell/pull/17), and [19](https://github.com/matthewmorek/ocx-profile-workcell/pull/19).
 
@@ -44,7 +46,29 @@ Each finding starts as `Pending`. Discuss findings individually and change the s
 
 For every resolved finding, replace the empty decision notes with the reason, resulting action, dependencies, and expected verification. Copying substantial Workcell text requires MIT attribution and an update to `THIRD_PARTY_NOTICES.md`.
 
-The completed decision pass contains 18 changes, 5 retained directions, 9 deferred decisions, and 3 rejected directions. Deferred model and role decisions preserve the current configuration until their named study is complete.
+The completed decision pass contains 18 changes, 8 retained directions, no deferred decisions, and 9 rejected directions.
+
+## Model and agent-architecture study
+
+The study used `OPTION-07` as its anchor and compared `openai/gpt-5.6-sol`, `openai/gpt-5.6-terra`, `openai/gpt-5.6-luna`, and `openai/gpt-6-astra`. OpenCode `1.18.30` and OCX `2.0.15` resolved all four IDs through OpenAI OAuth. The runtime reported zero marginal cost under the subscription, so the comparison used task success, latency, tokens, tool behavior, handoffs, and permission boundaries rather than API price.
+
+OpenAI's current [agent model guidance](https://developers.openai.com/api/docs/guides/agents/models) recommends Astra as the starting model for most new SDK workflows and explicit workflow-level selection instead of an implicit runtime fallback. It supports a per-agent model only when a specialist consistently needs a different quality, latency, or cost profile. The model catalog positions [Sol](https://developers.openai.com/api/docs/models/gpt-5.6-sol) for complex professional work, [Terra](https://developers.openai.com/api/docs/models/gpt-5.6-terra) as the intelligence-and-cost balance, and [Luna](https://developers.openai.com/api/docs/models/gpt-5.6-luna) for cost-sensitive, high-volume work. Terra's experimental status in this profile is therefore a local evaluation state, not OpenAI's product classification.
+
+OpenAI's [agent evaluation](https://developers.openai.com/api/docs/guides/agent-evals), [evaluation-practice](https://developers.openai.com/api/docs/guides/evaluation-best-practices), and [orchestration](https://developers.openai.com/api/docs/guides/agents/orchestration#add-specialists-only-when-the-contract-changes) guidance says to start with traces, move to repeatable representative datasets, let evaluations drive multi-agent architecture, start with one agent, and add specialists only for material capability, policy, prompt, or trace boundaries. This supports the retained topology but makes Astra the official starting hypothesis for the central model comparison.
+
+Other first-party guidance points in the same direction. Anthropic recommends [starting with simple prompts and adding agentic complexity only after evaluation](https://www.anthropic.com/engineering/building-effective-agents), and its [agent-evaluation guidance](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) emphasizes realistic tasks, repeated trials, deterministic graders where possible, and transcript inspection. [OpenCode](https://opencode.ai/docs/agents/) centrally inherits models while allowing role overrides. Pi keeps a [minimal core](https://pi.dev/) and makes subagents optional, while its [reference extension](https://github.com/earendil-works/pi/tree/main/packages/coding-agent/examples/extensions/subagent) inherits the parent's model unless overridden. Matt Pocock recommends [application-specific model evaluation](https://www.aihero.dev/how-to-choose-an-llm) and usually [sequential implementation](https://www.aihero.dev/my-7-phases-of-ai-development). DeepSeek's official coding-agent material is an integration recipe rather than comparative architecture guidance, so it does not support a topology conclusion.
+
+Independent evidence came from Artificial Analysis's [GPT-5.6](https://artificialanalysis.ai/articles/gpt-5-6-has-landed) and [Astra](https://artificialanalysis.ai/articles/benchmarking-gpt-6-astra) evaluations, [Terminal-Bench 3.0](https://www.tbench.ai/news/terminal-bench-3-0), [Terminal-Bench Science 0.1](https://www.tbench.ai/news/terminal-bench-science-0-1), and [METR's Sol evaluation](https://metr.org/blog/2026-06-26-gpt-5-6-sol/). These sources support Sol or Astra for difficult implementation and terminal work and Luna for lightweight classification. They do not provide a common exact-model test for code review, planning, public research, Git preparation, or metadata. Scores from different benchmark versions and agent scaffolds were not compared directly.
+
+The initial local pilot used 53 model calls across direct Build, Plan, Review, private/public research, frontend implementation, self-verification, an independent Tester, debugging, and orchestrator-plus-Coder paths. Sol was consistently reliable. Terra was often faster on simple work but did not complete a repeated role-specific gate. Astra showed selected correctness strengths without a broad enough advantage for a persistent role pin. Luna produced one inaccurate public-research result and missed an exact coding invariant. The independent Tester found the same seeded failure as direct Build with an extra handoff and roughly two to three times the latency. Orchestrator-plus-Coder did not establish a durable advantage over direct ownership.
+
+The follow-up added 24 comparable completed runs: three serial medium-effort repetitions each for direct Build, contained Plan, fixed Review, and seeded fault diagnosis on Astra and Sol. All 24 met their deterministic contract, and both models fixed the seeded defect in every repetition. Median role latency favored Sol for Build (41.5 seconds versus 49.2) and Plan (11.9 versus 17.2), while Astra led Review (23.0 versus 33.9) and fault diagnosis (87.7 versus 92.9). Across one repetition of all four roles, median aggregate latency was 172.0 seconds for Astra and 179.4 for Sol; median aggregate final-step reported token totals were 39,299 and 43,785. These contained scenarios establish routine compatibility only. They do not exercise the difficult end-to-end work where Astra is positioned to differ or the decomposable work where orchestration might help.
+
+The campaign runner's first Astra smoke attempt timed out five headless scenarios at 300 seconds with empty event streams. A direct Astra probe and an exact manually launched Build run then completed, so the timeout is retained as runner or execution-context evidence rather than model failure. The comparable runs used fresh fixtures and alternating model order outside that runner path. Together with the two diagnostic calls, they bring the completed local-call total to 79.
+
+All four models kept the synthetic private marker out of the public-research prompt. Every parent response missed the corpus requirement to label local and public evidence separately, which remains an unresolved behavior regression. Scribe, Committer, Metadata, combined-private-research, and full specialist-topology challengers had no representative comparative run; their absence remains lack of demonstrated need rather than measured inferiority.
+
+The resulting starting policy follows public guidance before local optimization. Astra at medium effort is the inherited default. Review and Reviewer retain high effort because they are explicitly invoked review modes. Explore provisionally uses Terra at low effort because its read-only search contract is latency-sensitive and recoverable; incomplete evidence escalates to an Astra-owning parent. Luna remains the lightweight system model, and Sol is the first optimization comparator rather than a preassigned role. The versioned next campaign covers 28 tasks across seven workloads, with three hard cases and one easy control per workload. It compares model and effort before topology so those effects are not confounded.
 
 ## Comparison summary
 
@@ -61,7 +85,7 @@ The original assessment was to keep our architecture and import selected parts o
 | Worktrees | Herdr owns lifecycle | Custom plugin, terminal integration, and state database | Keep Herdr as the owner |
 | Distribution | Personal snapshot composed with upstream OCX components | Self-contained versioned OCX registry | Reconsider only if distribution becomes a goal |
 | Runtime surface | Small repository-owned plugin set | Several bundled plugins and pinned dependencies | Keep the smaller surface unless evidence warrants growth |
-| Models | Central model selection with per-role effort and verbosity | Explicit per-agent models and tested fingerprints | Keep central selection; test the resolved result |
+| Models | Astra inherited centrally, one provisional Terra Explore override, and per-role effort | Explicit per-agent models and tested fingerprints | Keep inheritance; optimize overrides from hard-task and usage evidence |
 
 ## Current strengths to preserve
 
@@ -72,8 +96,8 @@ The original assessment was to keep our architecture and import selected parts o
 - **Why it matters:** One owner avoids context translation, extra model calls, latency, and ambiguous write ownership.
 - **Workcell contrast:** Workcell's Build is an orchestrator that routes work to Coder, Debugger, Tester, Scribe, Reviewer, and Committer.
 - **Original recommendation:** Preserve direct Build ownership rather than adopting an orchestrator-only default.
-- **Decision:** `Defer`
-- **Decision notes:** Keep direct Build ownership unchanged for now, but revisit the architecture during the dedicated Sol/Luna/Terra/Astra model-routing study recorded under `OPTION-07`. The study should test whether any model and role combination makes delegated implementation materially better than a direct primary owner after accounting for quality, context transfer, latency, cost, verification, and write ownership. Until that evidence exists, Build remains the sole normal implementation owner.
+- **Decision:** `Keep`
+- **Decision notes:** Keep direct Build as the normal implementation owner. Public guidance from OpenAI, Anthropic, Pi, and Matt Pocock supports starting with one owner and adding coordination only when the task or contract requires it. The local pilots cover contained work and do not establish direct ownership as superior on complex, decomposable tasks. The hard-task campaign therefore compares direct ownership with one bounded helper and then manager-to-worker or isolated parallel designs on the same model and effort. Change the default only after repeated multi-class gains survive total latency, context transfer, integration, verification, and write-ownership accounting.
 
 ### KEEP-02 — Private and public evidence zones
 
@@ -82,8 +106,8 @@ The original assessment was to keep our architecture and import selected parts o
 - **Why it matters:** Permission and prompt boundaries both reduce accidental disclosure of local or connected private data.
 - **Workcell contrast:** Workcell separates internal Explore from external Researcher but has a less explicit prompt-sanitization protocol.
 - **Original recommendation:** Preserve our evidence-zone architecture.
-- **Decision:** `Defer`
-- **Decision notes:** Preserve all three evidence roles for now, including Explore's narrow current-workspace permissions and evidence-backed step ceiling and the critical Researcher/Web Researcher disclosure boundary. Reopen the exact role split during the complete model and agent-architecture study. Any redesign must preserve private-to-public prompt sanitization and least-privilege evidence access even if Explore and Researcher are later merged or remapped.
+- **Decision:** `Keep`
+- **Decision notes:** Keep Explore, Researcher, and Web Researcher as separate evidence zones. All four model pilots kept private fixture text out of public delegations, while the permission split continues to enforce least privilege independently of model behavior. No combined-role challenger established a navigation, quality, or latency benefit. The pilots did expose a separate reporting defect: parent responses did not label local and public evidence explicitly. Keep that regression visible in the corpus without weakening the disclosure boundary.
 
 ### KEEP-03 — Frozen, two-axis review with Hunk support
 
@@ -132,8 +156,8 @@ The original assessment was to keep our architecture and import selected parts o
 - **Why it matters:** Model changes do not require duplicated edits across every agent definition.
 - **Workcell contrast:** Workcell pins models per agent and tests their fingerprints.
 - **Original recommendation:** Keep central inheritance, but verify the resolved agent identities and options at runtime.
-- **Decision:** `Defer`
-- **Decision notes:** Preserve the current central Sol primary model and Luna small model until the dedicated model-routing study resolves this finding together with `OPTION-07`. Do not assign per-agent models before comparing Sol, Luna, Terra, and Astra across the current roles. After that study, retain central defaults unless an evaluated role-specific exception materially improves quality, context behavior, latency, or cost.
+- **Decision:** `Keep`
+- **Decision notes:** Keep central inheritance but use `openai/gpt-6-astra` at medium effort as the public-guidance starting default. Keep `openai/gpt-5.6-luna` as `small_model` for lightweight system work. The 24 paired Sol/Astra runs were too simple to select a global winner; they establish only that both models satisfy the contained contracts. Sol remains the first optimization comparator. Review and Reviewer retain high effort as risk-gated review modes. Explore is the sole provisional model exception under `OPTION-07`. Revisit the default and effort only after the hard-task campaign or observed usage demonstrates a workload-specific quality, reliability, latency, token, or cost-per-success difference.
 
 ## Recommended adaptations
 
@@ -273,8 +297,8 @@ The original assessment was to keep our architecture and import selected parts o
 - **Benefit:** Independent execution separates implementation claims from command evidence.
 - **Cost:** More handoffs, model calls, latency, permission design, and result-routing logic.
 - **Original recommendation:** Consider a constrained Tester only for high-risk work or after evaluations show repeated self-verification failures.
-- **Decision:** `Defer`
-- **Decision notes:** Do not add a Tester yet. Reopen it as part of the complete model and agent-architecture study, which must evaluate independent command execution, shell and artifact boundaries, false-completion detection, latency, cost, and coordination overhead. The two-tier smoke and behavior evaluations should preserve evidence relevant to that comparison.
+- **Decision:** `Reject`
+- **Decision notes:** Do not add an independent Tester role. In the seeded false-completion pilot, direct Build and every Tester candidate detected the same failing command, while the orchestrator-plus-Tester path added a handoff and took roughly two to three times as long. Independent terminal benchmarks favor Sol or Astra for difficult command work but do not show that a permanent Tester catches errors Build misses. Keep owner-run validation and risk-based independent Reviewer use. Reopen after repeated self-verification failures establish a specific command or artifact boundary that a constrained Tester can improve.
 
 ### OPTION-02 — Specialist Committer
 
@@ -282,8 +306,8 @@ The original assessment was to keep our architecture and import selected parts o
 - **Benefit:** The role has focused history-building rules and cannot edit source.
 - **Cost:** It must receive enough context to classify mixed changes and may repeat Git inspection that Build already performs.
 - **Original recommendation:** Copy useful authorization and staging rules into Build unless observed commit-quality problems justify a separate role.
-- **Decision:** `Defer`
-- **Decision notes:** Keep commit and publication ownership with Build for now, while refining its durable Git rules for separate authorization, explicit staging, unrelated-change preservation, cached-diff inspection, atomic intent, and truthful verification evidence. Reopen the Committer role during the complete model and agent-architecture study and compare history quality, permission isolation, context handoff, latency, and cost.
+- **Decision:** `Reject`
+- **Decision notes:** Keep commit and publication ownership with Build. No observed history-quality problem or trustworthy exact-model benchmark justifies transferring Git context to a separate agent. Build already has the accepted rules for separate authorization, explicit staging, unrelated-change preservation, cached-diff inspection, atomic intent, and truthful verification. Reopen only after repeated staging or history defects provide a representative comparison seam.
 
 ### OPTION-03 — Shared plan persistence and compaction injection
 
@@ -309,8 +333,8 @@ The original assessment was to keep our architecture and import selected parts o
 - **Benefit:** Richer labels may help when many background delegations exist.
 - **Cost:** Extra model calls, result disclosure to the metadata model, asynchronous state, and failure handling.
 - **Original recommendation:** Do not add it for our bounded delegation volume.
-- **Decision:** `Defer`
-- **Decision notes:** Keep deterministic delegation identifiers and task-derived labels for now. Reopen the Metadata role during the complete model and agent-architecture study so the full topology is evaluated consistently. Any proposal must justify additional model calls, excerpt disclosure, asynchronous state, failure handling, and cost against a demonstrated navigation or coordination benefit.
+- **Decision:** `Reject`
+- **Decision notes:** Keep deterministic delegation identifiers and task-derived labels. Luna's official positioning makes it the plausible model for lightweight metadata, and OpenCode already uses `small_model` for work such as title generation. No navigation problem was demonstrated that warrants a new Metadata role, another model call, result disclosure, asynchronous state, or fallback machinery. Reopen only with measured navigation failures under the profile's bounded delegation volume.
 
 ### OPTION-06 — Self-contained OCX registry
 
@@ -327,8 +351,8 @@ The original assessment was to keep our architecture and import selected parts o
 - **Benefit:** Every role's model identity is explicit and independently pinned.
 - **Cost:** Model changes are duplicated and can drift across files.
 - **Original recommendation:** Keep central inheritance and test the resolved result unless a role needs a genuinely different model.
-- **Decision:** `Defer`
-- **Decision notes:** Defer changes to a dedicated model and agent-architecture study using OpenAI's current public model documentation. The current profile centrally configures Sol as `model` and Luna as `small_model`; no tracked agent explicitly selects Luna, and Terra and Astra are not represented in the profile. The study must compare Sol, Luna, Terra, and Astra across both model routing and the complete role topology, including current and potential primary, research, implementation, debugging, testing, review, documentation, Git, and metadata roles. Evaluate capability, quality, context behavior, latency, cost, permission isolation, and coordination. Do not add a third central model concept without confirming OpenCode supports and needs it.
+- **Decision:** `Reject`
+- **Decision notes:** Reject a complete matrix of explicit per-agent pins. Use central Astra inheritance and one provisional exception: Explore uses Terra at low effort because public guidance aligns its balanced tier and low-effort search behavior with a fast, read-only, recoverable contract. This is an initial routing hypothesis, not a local optimization result. Keep Sol unassigned as the first flagship comparator and keep Luna out of autonomous roles until bounded extraction or classification evaluations justify it. Add another override only after hard-task or usage evidence shows a stable workload-specific benefit. Record exact runtime identities because the public tier IDs have no dated immutable snapshots.
 
 ## Directions originally recommended against
 
@@ -337,8 +361,8 @@ The original assessment was to keep our architecture and import selected parts o
 - **Finding:** Workcell's primary Build cannot inspect files, edit, or run shell commands and must route implementation through specialist children.
 - **Reason against:** It adds context translation and coordination overhead to contained work and conflicts with our single-owner philosophy.
 - **Original recommendation:** Reject as the default; retain bounded delegation for missing evidence and independent review.
-- **Decision:** `Defer`
-- **Decision notes:** Prohibit orchestrator-only Build for now, but defer permanent rejection until the Sol/Luna/Terra/Astra model study evaluates it against direct ownership. Any change must show materially better implementation quality or safety after accounting for context transfer, latency, cost, verification, permission boundaries, and coordination failures. Direct Build remains the active architecture until that evidence exists.
+- **Decision:** `Reject`
+- **Decision notes:** Reject orchestrator-only Build as the default because public guidance recommends starting with one owner and adding specialists only across material contracts. The contained local Coder pilot shows coordination overhead on easy work, not inferiority on complex work. Keep bounded delegation for missing evidence and independent review, with one write-capable owner at a time. The hard-task campaign must test orchestration separately from model routing on multi-file, dynamically decomposable, and integration-heavy work. Permit a different topology when repeated results show a material safety, quality, context, or latency gain after total coordination cost.
 
 ### REJECT-02 — Duplicate worktree/session lifecycle plugin
 
@@ -362,15 +386,15 @@ The original assessment was to keep our architecture and import selected parts o
 - **Reason against:** Configuration, documentation, glue, and mechanical edits do not always justify two additional agents.
 - **Original recommendation:** Apply independent verification and review according to risk or explicit request.
 - **Decision:** `Reject`
-- **Decision notes:** Reject a universal Tester and Reviewer mandate. The session-local work spec should name verification and independent-review needs according to observable behavior, risk, failure impact, and explicit user requests. Configuration, documentation, glue, and mechanical edits do not automatically require extra agents. Preserve risk-based independent review and the deferred evidence trigger for any future Tester.
+- **Decision notes:** Reject a universal Tester and Reviewer mandate. The session-local work spec should name verification and independent-review needs according to observable behavior, risk, failure impact, and explicit user requests. Configuration, documentation, glue, and mechanical edits do not automatically require extra agents. Preserve risk-based independent review and the evidence-based reopening trigger for a future Tester recorded under `OPTION-01`.
 
 ### REJECT-05 — All specialist agents without observed need
 
 - **Finding:** Workcell defines separate Coder, Debugger, Tester, Scribe, Committer, Metadata, Explore, Researcher, and Reviewer roles.
 - **Reason against:** Each role adds permissions, prompts, routing rules, tests, maintenance, and handoff failure modes.
 - **Original recommendation:** Add a role only when a repeated workflow problem gives it a clear boundary and measurable benefit.
-- **Decision:** `Defer`
-- **Decision notes:** Defer the complete role architecture to the Sol/Luna/Terra/Astra study rather than permanently rejecting specialist agents now. Preserve the current role set and deterministic metadata in the meantime. Reopen every role boundary in the study, including Build, Plan, Research, Review, Explore, Researcher, Web Researcher, Reviewer, Coder, Debugger, Tester, Scribe, Committer, Metadata, and any proposed replacement. Evaluate each boundary and the combined orchestration cost rather than assuming the Workcell set should be adopted together.
+- **Decision:** `Reject`
+- **Decision notes:** Reject the broad specialist topology as a standing default. Keep Build, Plan, Research, Review, Explore, Researcher, Web Researcher, and Reviewer with their current ownership and evidence boundaries. Coder, Debugger, Tester, Scribe, Committer, or Metadata remain candidates when observed work creates a material permission, tool, policy, context, output, or ownership boundary. Several challenger lanes lacked representative hard runs, so this decision records absence of demonstrated need rather than measured inferiority. Preserve the normal budget of one bounded investigation and one independent review while the staged campaign tests narrower additions.
 
 ### REJECT-06 — Mandatory Gitmoji commit policy
 
@@ -400,4 +424,4 @@ The default order starts with the changes most likely to improve every implement
 6. `KEEP-01` through `KEEP-07`
 7. `REJECT-01` through `REJECT-07`
 
-Accepted changes will be grouped into separate implementation slices only after the relevant decisions are recorded. This ledger does not itself authorize profile edits, commits, pushes, or publication.
+All findings are resolved. This ledger records the decisions and completed implementation slices but does not itself authorize later profile edits, commits, pushes, or publication.

@@ -482,7 +482,28 @@ test("Explore has the evidence-backed pilot step ceiling", async () => {
 	assert.match(explore, /^steps: 8$/m);
 });
 
-test("OpenCode resolves Explore's pilot step ceiling", (t) => {
+test("the public-guidance model baseline uses central Astra with one Explore override", async () => {
+	const profile = await readJson("opencode/profile/opencode.jsonc");
+	assert.equal(profile.model, "openai/gpt-6-astra");
+	assert.equal(profile.small_model, "openai/gpt-5.6-luna");
+
+	for (const agentName of ["build", "plan", "research", "researcher", "web-researcher"]) {
+		const agent = await readAgent(agentName);
+		assert.doesNotMatch(agent, /^model:/m, `${agentName} must inherit the central model`);
+		assert.match(agent, /^  reasoningEffort: medium$/m);
+	}
+	for (const agentName of ["review", "reviewer"]) {
+		const agent = await readAgent(agentName);
+		assert.doesNotMatch(agent, /^model:/m, `${agentName} must inherit the central model`);
+		assert.match(agent, /^  reasoningEffort: high$/m);
+	}
+
+	const explore = await readAgent("explore");
+	assert.match(explore, /^model: openai\/gpt-5\.6-terra$/m);
+	assert.match(explore, /^  reasoningEffort: low$/m);
+});
+
+test("OpenCode resolves Explore's model, effort, and pilot step ceiling", (t) => {
 	if (!requireRuntimeCommand(t, "opencode")) return;
 	const environment = {
 		...process.env,
@@ -491,6 +512,11 @@ test("OpenCode resolves Explore's pilot step ceiling", (t) => {
 	};
 	delete environment.OCX_CONTEXT;
 	const explore = runJson("opencode", ["debug", "agent", "explore"], { env: environment });
+	assert.deepEqual(explore.model, {
+		providerID: "openai",
+		modelID: "gpt-5.6-terra",
+	});
+	assert.equal(explore.options.reasoningEffort, "low");
 	assert.equal(explore.steps, 8);
 });
 
@@ -520,7 +546,7 @@ test("the evaluation corpus is versioned and has explicit safety oracles", async
 
 test("the model study pins exact candidates, bounds execution, and preserves safety invariants", async () => {
 	const study = await readJson("opencode/profile/evals/model-study.json");
-	assert.equal(study.version, 3);
+	assert.equal(study.version, 4);
 	assert.equal(study.anchor, "OPTION-07");
 	assert.deepEqual(
 		study.models.map(({ id }) => id),
@@ -542,6 +568,39 @@ test("the model study pins exact candidates, bounds execution, and preserves saf
 	assert.equal(study.controls.failFastOnHardInvariant, true);
 	assert.equal(study.controls.throughputConcurrency, 2);
 	assert.equal(study.controls.benchmarkConcurrency, 1);
+	assert.deepEqual(study.initialRouting.default, {
+		model: "openai/gpt-6-astra",
+		reasoningEffort: "medium",
+	});
+	assert.deepEqual(study.initialRouting.overrides, [{
+		role: "explore",
+		model: "openai/gpt-5.6-terra",
+		reasoningEffort: "low",
+		status: "provisional",
+		escalateTo: "openai/gpt-6-astra",
+	}]);
+	assert.deepEqual(study.initialRouting.highEffortRoles, ["review", "reviewer"]);
+	assert.equal(study.initialRouting.optimizationCandidate, "openai/gpt-5.6-sol");
+	const hardCampaign = study.hardTaskCampaign;
+	assert.equal(hardCampaign.workloads.length, 7);
+	assert.equal(hardCampaign.tasksPerWorkload, 4);
+	assert.equal(hardCampaign.hardTasksPerWorkload, 3);
+	assert.equal(hardCampaign.easyControlsPerWorkload, 1);
+	assert.equal(hardCampaign.totalTasks, hardCampaign.workloads.length * hardCampaign.tasksPerWorkload);
+	assert.equal(
+		hardCampaign.tasksPerWorkload,
+		hardCampaign.hardTasksPerWorkload + hardCampaign.easyControlsPerWorkload,
+	);
+	assert.equal(hardCampaign.hardRepetitions, 3);
+	assert.equal(hardCampaign.easyInitialRepetitions, 1);
+	assert.deepEqual(hardCampaign.comparisonOrder, [
+		"baseline-model-and-effort",
+		"model-substitutions",
+		"topology",
+	]);
+	assert.equal(hardCampaign.promotion.efficiencyImprovementPercent, 30);
+	assert.equal(hardCampaign.promotion.requireHardTaskNonInferiority, true);
+	assert.equal(hardCampaign.promotion.maxCriticalFailureIncrease, 0);
 	assert.equal(new Set(study.decisionIds).size, 9);
 	assert.equal(new Set(study.lanes.map(({ id }) => id)).size, study.lanes.length);
 	for (const invariant of [
