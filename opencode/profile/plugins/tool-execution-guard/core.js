@@ -54,6 +54,21 @@ function hasStandaloneCorruptionArtifact(command) {
 	return Boolean(gitSubcommand && !gitSubcommand.startsWith("-") && !/^[a-z][a-z0-9-]*$/u.test(gitSubcommand));
 }
 
+function normalizeLegacyWorkspace(payload, workspaceRoot) {
+	if (
+		!isPlainObject(payload) ||
+		!Object.hasOwn(payload, "workdir") ||
+		Object.hasOwn(payload, "directory") ||
+		payload.workdir !== workspaceRoot
+	) {
+		return payload;
+	}
+
+	const normalized = { ...payload, directory: "workspace" };
+	delete normalized.workdir;
+	return normalized;
+}
+
 function parseBashPayload(payload) {
 	if (!isPlainObject(payload)) throw new ToolPayloadError("INVALID_PAYLOAD");
 	if (Object.hasOwn(payload, "workdir")) throw new ToolPayloadError("INVALID_WORKDIR");
@@ -207,7 +222,7 @@ export function createToolExecutionGuard({
 
 			let payload;
 			try {
-				payload = parseBashPayload(output.args);
+				payload = parseBashPayload(normalizeLegacyWorkspace(output.args, workspaceRoot));
 			} catch (error) {
 				if (error instanceof ToolPayloadError) return rejectPayload(input, error);
 				throw error;

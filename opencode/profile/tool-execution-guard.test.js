@@ -246,6 +246,34 @@ test("requires a fresh approved directory after a malformed retry", async (t) =>
 	assert.equal(afterRecovery.code, "INVALID_WORKDIR");
 });
 
+test("legacy workdir recovers only when it exactly matches the workspace root", async (t) => {
+	const { root, workspaceRoot, tempRoot } = await createFixture(t);
+	const hooks = createToolExecutionGuard({ workspaceRoot, tempRoot });
+	const sessionID = "legacy-workdir-session";
+
+	await structuredRejection(() =>
+		guardBash(hooks, { command: "pwd", workdir: "/invented" }, sessionID),
+	);
+	const recovered = await guardBash(hooks, {
+		command: "pwd",
+		workdir: workspaceRoot,
+	}, sessionID);
+	const outsideFailure = await structuredRejection(() =>
+		guardBash(hooks, { command: "pwd", workdir: root }, "outside-session"),
+	);
+	const conflictingFailure = await structuredRejection(() =>
+		guardBash(hooks, {
+			command: "pwd",
+			directory: "workspace",
+			workdir: workspaceRoot,
+		}, "conflicting-session"),
+	);
+
+	assert.equal(recovered.workdir, await realpath(workspaceRoot));
+	assert.equal(outsideFailure.code, "INVALID_WORKDIR");
+	assert.equal(conflictingFailure.code, "INVALID_WORKDIR");
+});
+
 test("clears circuit-breaker state when its session is deleted", async (t) => {
 	const { workspaceRoot, tempRoot } = await createFixture(t);
 	const hooks = createToolExecutionGuard({ workspaceRoot, tempRoot });
