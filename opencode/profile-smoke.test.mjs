@@ -17,7 +17,7 @@ test("deterministic smoke installs and fingerprints the repository profile", asy
 
 	assert.equal(result.tier, "deterministic");
 	assert.equal(result.profile.defaultAgent, "build");
-	assert.equal(result.profile.model, "openai/gpt-5.6-sol");
+	assert.equal(result.profile.model, "openai/gpt-6-astra");
 	assert.equal(result.profile.smallModel, "openai/gpt-5.6-luna");
 	assert.deepEqual(result.agents, [
 		"build",
@@ -62,7 +62,7 @@ test("runtime smoke fingerprints resolved OpenCode and OCX semantics", async (t)
 					profileName: "ws",
 					opencode: {
 						default_agent: "build",
-						model: "openai/gpt-5.6-sol",
+						model: "openai/gpt-6-astra",
 						small_model: "openai/gpt-5.6-luna",
 						plugin: [deterministicResult.dcp.serverRegistration],
 						permission: {
@@ -80,7 +80,7 @@ test("runtime smoke fingerprints resolved OpenCode and OCX semantics", async (t)
 			return {
 				stdout: JSON.stringify({
 					default_agent: "build",
-					model: "openai/gpt-5.6-sol",
+					model: "openai/gpt-6-astra",
 					small_model: "openai/gpt-5.6-luna",
 					plugin: [
 						deterministicResult.dcp.serverRegistration,
@@ -104,9 +104,9 @@ test("runtime smoke fingerprints resolved OpenCode and OCX semantics", async (t)
 		if (arguments_[1] === "agent") {
 			const agentName = arguments_[2];
 			const fingerprints = {
-				build: ["primary", "high", "low"],
-				explore: ["subagent", "medium", "medium"],
-				plan: ["primary", "high", "low"],
+				build: ["primary", "medium", "low"],
+				explore: ["subagent", "low", "medium"],
+				plan: ["primary", "medium", "low"],
 				research: ["primary", "medium", "medium"],
 				researcher: ["subagent", "medium", "medium"],
 				review: ["primary", "high", "medium"],
@@ -135,6 +135,9 @@ test("runtime smoke fingerprints resolved OpenCode and OCX semantics", async (t)
 				stdout: JSON.stringify({
 					name: agentName,
 					mode,
+					...(agentName === "explore" ? {
+						model: { providerID: "openai", modelID: "gpt-5.6-terra" },
+					} : {}),
 					options: { reasoningEffort, textVerbosity },
 					permission,
 					tools: {

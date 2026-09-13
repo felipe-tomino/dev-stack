@@ -43,9 +43,14 @@ const EXPECTED_AGENTS = Object.freeze([
 	"web-researcher",
 ]);
 const EXPECTED_AGENT_FINGERPRINTS = Object.freeze({
-	build: { mode: "primary", reasoningEffort: "high", textVerbosity: "low" },
-	explore: { mode: "subagent", reasoningEffort: "medium", textVerbosity: "medium" },
-	plan: { mode: "primary", reasoningEffort: "high", textVerbosity: "low" },
+	build: { mode: "primary", reasoningEffort: "medium", textVerbosity: "low" },
+	explore: {
+		mode: "subagent",
+		model: "openai/gpt-5.6-terra",
+		reasoningEffort: "low",
+		textVerbosity: "medium",
+	},
+	plan: { mode: "primary", reasoningEffort: "medium", textVerbosity: "low" },
 	research: { mode: "primary", reasoningEffort: "medium", textVerbosity: "medium" },
 	researcher: { mode: "subagent", reasoningEffort: "medium", textVerbosity: "medium" },
 	review: { mode: "primary", reasoningEffort: "high", textVerbosity: "medium" },
@@ -425,12 +430,15 @@ export async function runRuntimeSmoke({
 	}
 	for (const [agentName, expected] of Object.entries(EXPECTED_AGENT_FINGERPRINTS)) {
 		const agent = resolvedAgents[agentName];
+		const resolvedModel = agent.model === undefined
+			? profile.model
+			: `${agent.model.providerID}/${agent.model.modelID}`;
 		if (
 			agent.name !== agentName ||
 			agent.mode !== expected.mode ||
 			agent.options?.reasoningEffort !== expected.reasoningEffort ||
 			agent.options?.textVerbosity !== expected.textVerbosity ||
-			(agent.model !== undefined && agent.model !== profile.model)
+			resolvedModel !== (expected.model ?? profile.model)
 		) {
 			throw new Error(`Resolved ${agentName} identity, mode, model, or options differ from the fingerprint.`);
 		}
